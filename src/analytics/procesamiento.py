@@ -1,4 +1,3 @@
-# Datos simulados: Coordenadas (x, y) de los vehículos por frame
 frames = {
     1: [(10, 20), (30, 40), (50, 60), (70, 80), (90, 100), (110, 120)],
     2: [(15, 25), (35, 45)],

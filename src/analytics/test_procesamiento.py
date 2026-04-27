@@ -4,12 +4,10 @@ import time
 import matplotlib.pyplot as plt
 
 
-# Generar datos
 def generar_frame(n):
     return [(random.randint(0,600), random.randint(0,400)) for _ in range(n)]
 
 
-#Pruebas metricas
 frames = {
     1: generar_frame(6),
     2: generar_frame(2),
@@ -28,7 +26,6 @@ for f, vehiculos in frames.items():
     print(f"{f:<6} {r['n_vehiculos']:<10} {r['densidad']:<10} {z['Z1']:<4} {z['Z2']:<4} {z['Z3']:<4} {r['dispersion']:<10}")
 
 
-# Medicion de tiempo
 tamanos = [100, 500, 1000, 2000]
 tiempos = []
 
@@ -48,7 +45,6 @@ for n in tamanos:
     tiempos.append((n, promedio))
 
 
-# Tabla de rendimiento
 print("\n=== RENDIMIENTO ===\n")
 
 print(f"{'Vehículos':<12} {'Tiempo (ms)':<12}")
@@ -58,7 +54,6 @@ for t in tiempos:
     print(f"{t[0]:<12} {t[1]:<12.4f}")
 
 
-# Gráfica
 x = [t[0] for t in tiempos]
 y = [t[1] for t in tiempos]
 
