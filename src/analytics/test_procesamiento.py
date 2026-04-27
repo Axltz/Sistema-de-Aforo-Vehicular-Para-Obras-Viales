@@ -1,36 +1,69 @@
-import time
+from procesamiento import procesar_frame
 import random
-from procesamiento import AnalizadorTrafico
+import time
+import matplotlib.pyplot as plt
 
-def ejecutar_test_realista():
-    analizador = AnalizadorTrafico()
-    
-    header = f"{'FRAME':<6} | {'AUTOS':<5} | {'ESTADO':<10} | {'TENDENCIA':<20} | {'VEL (km/h)':<12} | {'DISPERSIÓN':<12} | {'ACTIVIDAD':<10}"
-    print("\n" + header)
-    print("-" * len(header))
 
-    for i in range(1, 16):
-        n = i * 8  
-        
-        vehiculos = [
-            {
-                "x": random.uniform(10, 50), 
-                "y": random.uniform(5, 15)
-            } for _ in range(n)
-        ]
-        
-        res = analizador.procesar_frame_vehiculo(vehiculos, tiempo_segundos=1.0)
-        datos = res['numeros']
-        
-        print(f"{i:<6} | "
-              f"{n:<5} | "
-              f"{res['estado']:<10} | "
-              f"{res['cambio_frame']:<20} | "
-              f"{datos['velocidad_simulada']:<12.2f} | "
-              f"{datos['dispersion']:<12.2f} | "
-              f"{datos['actividad_espacial']:<10.5f}")
-        
-        time.sleep(0.1)
+# Generar datos
+def generar_frame(n):
+    return [(random.randint(0,600), random.randint(0,400)) for _ in range(n)]
 
-if __name__ == "__main__":
-    ejecutar_test_realista()
+
+#Pruebas metricas
+frames = {
+    1: generar_frame(6),
+    2: generar_frame(2),
+    3: generar_frame(16),
+}
+
+print("\n=== MÉTRICAS ===\n")
+
+print(f"{'Frame':<6} {'Vehículos':<10} {'Densidad':<10} {'Z1':<4} {'Z2':<4} {'Z3':<4} {'Disp':<10}")
+print("-" * 60)
+
+for f, vehiculos in frames.items():
+    r = procesar_frame(vehiculos)
+    z = r["zonas"]
+
+    print(f"{f:<6} {r['n_vehiculos']:<10} {r['densidad']:<10} {z['Z1']:<4} {z['Z2']:<4} {z['Z3']:<4} {r['dispersion']:<10}")
+
+
+# Medicion de tiempo
+tamanos = [100, 500, 1000, 2000]
+tiempos = []
+
+for n in tamanos:
+    total = 0
+
+    for _ in range(10):
+        frame = generar_frame(n)
+
+        inicio = time.time()
+        procesar_frame(frame)
+        fin = time.time()
+
+        total += (fin - inicio)
+
+    promedio = (total / 10) * 1000
+    tiempos.append((n, promedio))
+
+
+# Tabla de rendimiento
+print("\n=== RENDIMIENTO ===\n")
+
+print(f"{'Vehículos':<12} {'Tiempo (ms)':<12}")
+print("-" * 25)
+
+for t in tiempos:
+    print(f"{t[0]:<12} {t[1]:<12.4f}")
+
+
+# Gráfica
+x = [t[0] for t in tiempos]
+y = [t[1] for t in tiempos]
+
+plt.plot(x, y, marker='o')
+plt.xlabel("Número de vehículos")
+plt.ylabel("Tiempo (ms)")
+plt.title("Rendimiento del procesamiento por frame")
+plt.show()
