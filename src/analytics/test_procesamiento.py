@@ -1,4 +1,4 @@
-from procesamiento import procesar_frame
+from procesamiento import procesar_frame, clasificar_trafico, detectar_patron, comparar_frames
 import random
 import time
 import matplotlib.pyplot as plt
@@ -9,21 +9,31 @@ def generar_frame(n):
 
 
 frames = {
-    1: generar_frame(6),
+    1: generar_frame(6), 
     2: generar_frame(2),
     3: generar_frame(16),
 }
 
-print("\n=== MÉTRICAS ===\n")
 
-print(f"{'Frame':<6} {'Vehículos':<10} {'Densidad':<10} {'Z1':<4} {'Z2':<4} {'Z3':<4} {'Disp':<10}")
-print("-" * 60)
+print("\n=== MÉTRICAS COMPLETAS ===\n")
+
+print(f"{'Frame':<6} {'Veh':<6} {'Dens':<6} {'Z1':<4} {'Z2':<4} {'Z3':<4} {'Disp':<12} {'Estado':<28} {'Patrón':<28} {'Cambio'}")
+print("-" * 130)
+
+anterior = None
 
 for f, vehiculos in frames.items():
     r = procesar_frame(vehiculos)
+
+    estado = clasificar_trafico(r["densidad"], r["dispersion"])
+    patron = detectar_patron(r["zonas"])  
+    cambio = comparar_frames(r, anterior)
+
     z = r["zonas"]
 
-    print(f"{f:<6} {r['n_vehiculos']:<10} {r['densidad']:<10} {z['Z1']:<4} {z['Z2']:<4} {z['Z3']:<4} {r['dispersion']:<10}")
+    print(f"{f:<6} {r['n_vehiculos']:<6} {r['densidad']:<6} {z['Z1']:<4} {z['Z2']:<4} {z['Z3']:<4} {r['dispersion']:<12.2f} {estado:<28} {patron:<28} {cambio}")
+
+    anterior = r
 
 
 tamanos = [100, 500, 1000, 2000]
