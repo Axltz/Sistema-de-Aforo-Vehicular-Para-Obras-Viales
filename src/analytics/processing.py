@@ -65,7 +65,6 @@ def calibrate_system(vehiculos_detectados, dimensiones_frame, estado):
                 "x1": int(max(0, min_x - 150)), "y1": int(max(0, min_y - margen_top)),
                 "x2": int(min(ancho, max_x + 150)), "y2": int(min(alto, max_y + margen_bottom))
             }
-            # La línea abarca del extremo izquierdo al extremo derecho del recorte
             line_x1 = estado["active_roi"]["x1"]
             line_x2 = estado["active_roi"]["x2"]
             estado["line"] = {"start": (line_x1, int(cy)), "end": (line_x2, int(cy))}
@@ -99,23 +98,6 @@ def calibrate_system(vehiculos_detectados, dimensiones_frame, estado):
         
         estado["calibration_locked"] = True
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 def count_vehicles(detections, state):
     if not state.get("calibration_locked"): return 0, None
     
@@ -125,11 +107,7 @@ def count_vehicles(detections, state):
     for d in detections:
         vid, curr = d["id"], np.array(d["center"])
         # Obtener posición anterior antes de que fuera actualizada
-        prev = np.array(state["ids_history"].get(vid, curr))
-        # (La actualización de ids_history ocurre en pipeline.py antes de llamar a esto)
-        # Ojo: si actualizamos antes, el 'prev' siempre será igual a 'curr'.
-        # Voy a mover la actualización de ids_history al FINAL de count_vehicles.
-        
+        prev = np.array(state["ids_history"].get(vid, curr))        
         # Filtrar por dirección
         if state["orientation"] == "vertical":
             if (curr[1] - prev[1]) * state["flow_direction"] < 0: continue
@@ -164,4 +142,4 @@ def count_vehicles(detections, state):
     current_time = time.time()
     state["crossing_timestamps"] = [t for t in state.get("crossing_timestamps", []) if current_time - t <= 60]
 
-    return state["total_count"], line
+    return state["total_count"], line
