@@ -1,38 +1,46 @@
+# ==============================================================================
+# clustering.py - EL AGRUPADOR (Inteligencia Espacial)
+# ==============================================================================
+# Este módulo se encarga de analizar las distancias físicas entre todos los
+# vehículos en pantalla. Su meta es detectar cuándo los autos están formando un 
+# "pelotón" (grupo) porque van muy pegados.
+
 import numpy as np
 from sklearn.cluster import DBSCAN
 
-def normalize_position(center, frame_shape):
-    h, w = frame_shape[:2]
-    x,y = center
-    nx = x / w
-    ny = y / h
-    return nx, ny
-
-def normalize_direction(direction):
-    dx, dy = direction
-    magnitude = np.sqrt(dx**2 + dy**2)
-    if magnitude == 0:
-        return 0, 0
-    ndx = dx / magnitude
-    ndy = dy / magnitude
-    return ndx, ndy
-
-def detect_dynamic_lanes(vehiculos_detectados, estado_sistema_aforo, dimensiones_frame, orientacion):
-    if not vehiculos_detectados: return {}
+def detect_traffic_clusters(vehiculos_detectados, dimensiones_frame):
+    """
+    Agrupa vehículos por proximidad física (congestión).
+    Sirve para identificar cuellos de botella en zonas de obra.
+    """
+    if not vehiculos_detectados: 
+        return {}
     
     alto, ancho = dimensiones_frame[:2]
-    # Extraer centros de vehículos
+    # Extraemos solo las coordenadas (X, Y) de cada auto detectado
     centros = np.array([v["center"] for v in vehiculos_detectados])
     
-    # DBSCAN: Agrupa vehículos cercanos (8% del ancho del video)
-    # Esto detecta grupos físicos reales, independiente de la resolución
-    eps_relativo = ancho * 0.08
+    # PARAMETRO 1: Epsilon (eps)
+    # Define la distancia máxima entre dos autos para considerarlos "vecinos".
+    # Usamos el 10% del ancho del video (Agrupa autos a unos 3-4 metros de distancia real)
+    eps_distancia = ancho * 0.10 
     
-    db = DBSCAN(eps=eps_relativo, min_samples=1).fit(centros)
+    # PARAMETRO 2: min_samples
+    # Define cuántos autos juntos se necesitan para formar un "Grupo".
+    # min_samples=3 para ignorar parejitas de autos (eso es tráfico normal).
+    # Solo nos importan bultos de 3 o más carros pegados.
+    db = DBSCAN(eps=eps_distancia, min_samples=3).fit(centros)
+    
     grupos = {}
     for i, etiqueta in enumerate(db.labels_):
-        nombre_grupo = f"Grupo_{etiqueta}"
-        if nombre_grupo not in grupos: grupos[nombre_grupo] = []
+        # DBSCAN asigna la etiqueta -1 al "ruido" (autos que van solos o en parejas)
+        if etiqueta == -1: continue 
+        
+        # Si la etiqueta es 0, 1, 2, etc... significa que pertenece a un grupo válido
+        nombre_grupo = f"Congestion_{etiqueta}"
+        if nombre_grupo not in grupos:
+            grupos[nombre_grupo] = []
+            
         grupos[nombre_grupo].append(vehiculos_detectados[i]["id"])
         
     return grupos

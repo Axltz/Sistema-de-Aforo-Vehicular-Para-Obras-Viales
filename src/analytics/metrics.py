@@ -1,4 +1,5 @@
 import numpy as np
+import time
 
 def calculate_spatial_occupancy(detections,frame_shape):
 
@@ -142,37 +143,37 @@ def calculate_metrics(vehiculos_flujo_objetivo, grafo_interaccion_espacial, grup
 
 
     
-    # 3. ANALISIS DE MOVIMIENTO (PROMEDIO SOBRE 10 FRAMES)
-    historial_metricas = estado_sistema_aforo.get("metrics_history", [])
-    posiciones_actuales = {v["id"]: v["center"] for v in vehiculos_flujo_objetivo}
-    posiciones_previas = historial_metricas[-1].get("prev_ids_pos", {}) if historial_metricas else {}
+    # 3. ANALISIS DE FLUJO (Teoría de Flujo Vehicular: Cruces por Minuto)
+    # Reemplazamos la velocidad en píxeles por la Tasa de Flujo real
+    timestamps = estado_sistema_aforo.get("crossing_timestamps", [])
+    current_time = time.time()
     
-    desplazamientos = [np.sqrt((posiciones_actuales[vid][0]-posiciones_previas[vid][0])**2 + (posiciones_actuales[vid][1]-posiciones_previas[vid][1])**2) 
-                       for vid in posiciones_actuales if vid in posiciones_previas]
-    
-    # Movimiento en píxeles por cada 10 frames
-    mov_total_10_frames = np.mean(desplazamientos) if desplazamientos else 0.0
-    # Normalizar a píxeles por frame
-    mov_por_frame = mov_total_10_frames / 10.0
-    
-    # A) VELOCIDAD DE MARCHA (¿Qué tan rápido van?)
-    if mov_por_frame > 4.5: velocidad_marcha = "RAPIDA"
-    elif mov_por_frame > 1.8: velocidad_marcha = "MODERADA"
-    elif mov_por_frame > 0.4: velocidad_marcha = "LENTA"
-    else: velocidad_marcha = "MUY LENTA / PARADO"
-        
-    # B) FLUIDEZ DEL AVANCE (¿Qué tan constante es el flujo?)
-    # Un flujo puede ser lento pero constante (bueno para obra)
-    if conteo_vehiculos_escena == 0:
-        fluidez_avance = "VÍA DESPEJADA"
-    elif porcentaje_interaccion_espacial > 70:
-        fluidez_avance = "CONGESTIONADO (SATURADO)"
-    elif mov_por_frame > 2.0:
-        fluidez_avance = "FLUJO CONSTANTE"
-    elif mov_por_frame > 0.5:
-        fluidez_avance = "FLUJO LENTO PERO CONSTANTE"
+    if len(timestamps) >= 2:
+        # Tiempo entre el primer cruce recordado y el actual
+        tiempo_transcurrido = max(1.0, current_time - timestamps[0])
+        flujo_por_minuto = (len(timestamps) / tiempo_transcurrido) * 60.0
+    elif len(timestamps) == 1:
+        flujo_por_minuto = 1.0 # Al menos 1 cruzó
     else:
-        fluidez_avance = "AVANCE INTERMITENTE"
+        flujo_por_minuto = 0.0
+        
+    # A) ESTADO DEL FLUJO (¿Qué tan rápido cruzan la línea?)
+    if flujo_por_minuto > 30: velocidad_marcha = "FLUJO ALTO"
+    elif flujo_por_minuto > 10: velocidad_marcha = "FLUJO MODERADO"
+    elif flujo_por_minuto > 0: velocidad_marcha = "FLUJO BAJO"
+    else: velocidad_marcha = "SIN FLUJO / DETENIDO"
+        
+    # B) DIAGNÓSTICO DE LA VÍA (Relación Flujo - Densidad)
+    if conteo_vehiculos_escena == 0:
+        fluidez_avance = "VIA DESPEJADA"
+    elif porcentaje_interaccion_espacial > 70 and flujo_por_minuto < 5:
+        fluidez_avance = "CONGESTION SEVERA (Tráfico Detenido)"
+    elif porcentaje_interaccion_espacial > 50 and flujo_por_minuto > 20:
+        fluidez_avance = "TRAFICO DENSO PERO FLUIDO"
+    elif flujo_por_minuto > 10:
+        fluidez_avance = "FLUJO LIBRE"
+    else:
+        fluidez_avance = "TRAFICO LENTO"
         
     metricas_analisis_vial = {
         "total_vehicles": conteo_vehiculos_escena,
@@ -180,12 +181,46 @@ def calculate_metrics(vehiculos_flujo_objetivo, grafo_interaccion_espacial, grup
         "interaccion_pct": porcentaje_interaccion_espacial,
         "velocidad_marcha": velocidad_marcha,
         "fluidez_avance": fluidez_avance,
+        "flujo_por_minuto": round(flujo_por_minuto, 1),
         "total_count": estado_sistema_aforo.get("total_count", 0),
-        "prev_ids_pos": posiciones_actuales.copy()
+        "prev_ids_pos": {} # Mantenemos por compatibilidad
     }
+    
+    # 4. ALERTA DE EMBOTELLAMIENTO (Densidad vs Flujo)
+    metricas_congestiones = []
+    alerta_activa = False
+            
+    for i, (nombre_base, vehiculos_en_grupo) in enumerate(grupos_espaciales_activos.items()):
+        conteo_grupo = len(vehiculos_en_grupo)
+        densidad_grupo = (conteo_grupo / conteo_vehiculos_escena * 100) if conteo_vehiculos_escena > 0 else 0
+        
+        # NUEVA LÓGICA INFALIBLE: 
+        # Si hay autos amontonados (>= 3) PERO nadie está cruzando la línea (Flujo < 5 veh/min)
+        # Significa que están atrapados. = EMBOTELLAMIENTO
+        if flujo_por_minuto < 5.0 and conteo_grupo >= 3:
+            riesgo = "ALTO"
+            nombre_final = "Zona de Riesgo"
+            alerta_activa = True
+        else:
+            # Si hay flujo, solo es un grupo avanzando
+            riesgo = "BAJO"
+            nombre_final = "Grupo de Vehiculos"
+            
+        metricas_congestiones.append({
+            "nombre": nombre_final,
+            "conteo": conteo_grupo,
+            "densidad_pct": densidad_grupo,
+            "riesgo": riesgo,
+            "velocidad": round(flujo_por_minuto, 1), # Reutilizamos el campo para mostrar el flujo
+            "ids": vehiculos_en_grupo
+        })
+        
+    metricas_analisis_vial["cluster_metrics"] = metricas_congestiones
+    metricas_analisis_vial["alerta_embotellamiento"] = alerta_activa
+    
     return metricas_analisis_vial
 
 
 
 
-
+

@@ -9,13 +9,16 @@ def frame_detection(video_frame):
     results = model.track(
         video_frame, 
         persist=True,
-        classes=[2,3,5,7],
+        classes=[1, 2, 3, 5, 6, 7], # Bicicleta, Coche, Moto, Autobús, Tren, Camión
         verbose=False,
-        conf=0.10,
-        iou=0.3,
-        imgsz=1024
-    )
+        conf=0.005,
+        iou=0.45,
+        imgsz=800
 
+
+
+
+    )
 
 
         
