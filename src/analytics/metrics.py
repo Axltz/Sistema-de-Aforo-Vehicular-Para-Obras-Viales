@@ -45,11 +45,9 @@ def calculate_average_speed(state):
         if len(trajectory) < 2:
             continue
 
-        # Posición en t-1 y t
         x1, y1 = trajectory[-2]
         x2, y2 = trajectory[-1]
 
-        # Fórmula de distancia euclidiana: sqrt((x2-x1)^2 + (y2-y1)^2)
         distance = np.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
         speeds.append(distance)
 
@@ -85,7 +83,6 @@ def calculate_average_distance(graph, detections):
             x1, y1 = center_a
             x2, y2 = center_b
 
-            # Distancia euclidiana entre vecinos interconectados
             distance = np.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
             distances.append(distance)
 
@@ -116,7 +113,6 @@ def calculate_compactness(graph):
     return compactness
 
 
-# Conversión a unidades REALES estimadas (para modelado físico)
 PX_TO_M_X = 7.0 / 1280.0 
 PX_TO_M_Y = 50.0 / 720.0
 
@@ -137,15 +133,11 @@ def calculate_metrics(vehiculos_flujo_objetivo, grafo_interaccion_espacial, grup
     # 2. ANÁLISIS DE INTERACCIÓN (Saturación de la vía)
     # Se evalúa qué tan agrupados físicamente están los autos en el carril.
     if conteo_vehiculos_escena > 1:
-        # Ratio de agrupamiento: 1.0 = Todos los autos forman un solo bloque masivo.
         ratio_agrupamiento = 1.0 - (conteo_grupos_activos / conteo_vehiculos_escena)
         
-        # Densidad de conexiones del grafo (saturación de vecinos cercanos)
         total_conexiones = sum([len(conexiones) for conexiones in grafo_interaccion_espacial.values()])
-        # Normalización estricta: requiere 4 vecinos por auto para saturar al 100% la capacidad de vía
         densidad_conexiones = total_conexiones / (conteo_vehiculos_escena * 4)
         
-        # Combinamos: saturación alta si hay alta conectividad y pocos grupos separados
         porcentaje_interaccion_espacial = (ratio_agrupamiento * 0.7 + densidad_conexiones * 0.3) * 100
     else:
         porcentaje_interaccion_espacial = 0

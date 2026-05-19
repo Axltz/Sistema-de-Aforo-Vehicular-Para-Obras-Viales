@@ -25,10 +25,8 @@ def build_proximity_graph(detections, frame_shape, factor_distancia=0.05):
     Sirve para alimentar los algoritmos de detección de colisiones e interacción espacial.
     """
     alto, ancho = frame_shape[:2]
-    # Distancia umbral máxima para considerar que dos carros interactúan (en píxeles)
     distancia_limite = ancho * factor_distancia
     
-    # Inicializamos el grafo con una lista de adyacencia vacía para cada vehículo detectado
     grafo = {v["id"]: [] for v in detections}
     centros = {v["id"]: v["center"] for v in detections}
     lista_ids = list(centros.keys())
@@ -38,7 +36,6 @@ def build_proximity_graph(detections, frame_shape, factor_distancia=0.05):
         for j in range(i + 1, len(lista_ids)):
             p1, p2 = centros[lista_ids[i]], centros[lista_ids[j]]
             
-            # Distancia matemática
             distancia = np.sqrt((p1[0]-p2[0])**2 + (p1[1]-p2[1])**2)
             
             # Si están lo suficientemente cerca, creamos una arista bidireccional

@@ -22,34 +22,27 @@ def frame_detection(video_frame):
     # Ejecutamos el rastreo con YOLO en el frame
     results = model.track(
         video_frame, 
-        persist=True,               # persist=True mantiene los IDs constantes entre cuadros consecutivos
+        persist=True,               
         classes=[1, 2, 3, 5, 6, 7], # Filtramos clases de COCO Dataset: 1:Bici, 2:Carro, 3:Moto, 5:Bus, 6:Tren, 7:Camión
         verbose=False,              # Desactivamos los prints excesivos en consola para no ensuciarla
-        conf=0.005,                 # Umbral de confianza bajo para detectar autos incluso lejanos en vertical
-        iou=0.45,                   # IoU (Intersection over Union) para supresión de no máximos (elimina duplicados)
+        conf=0.005,                 
+        iou=0.45,                 
         imgsz=800                   # Redimensionado interno de imagen para optimizar precisión en YOLO
     )
 
-    # Extraemos las cajas delimitadoras (Bounding Boxes) del resultado
     boxes = results[0].boxes
     
-    # Si YOLO no detecta absolutamente nada en este cuadro, retornamos lista vacía
     if boxes.id is None:
         return []
     
     detections = []
 
-    # Extraemos los IDs de rastreo y las coordenadas absolutas de las cajas (BBoxes)
     ids = boxes.id.cpu().numpy().astype(int)
     coords = boxes.xyxy.cpu().numpy()
 
-    # Iteramos cada objeto detectado para construir nuestro diccionario de datos
     for id_obj, box in zip(ids, coords):
-        # Desempaquetamos coordenadas: x1/y1 (arriba-izquierda), x2/y2 (abajo-derecha)
         x1, y1, x2, y2 = box
         
-        # Calculamos matemáticamente el Centroide del vehículo (centro físico de la caja)
-        # Esto sirve para evaluar si el carro cruza la línea o se une a grupos.
         cx = int((x1 + x2) / 2)
         cy = int((y1 + y2) / 2)
 

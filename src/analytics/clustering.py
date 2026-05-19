@@ -2,8 +2,7 @@
 # clustering.py - EL AGRUPADOR (Inteligencia Espacial)
 # ==============================================================================
 # Este módulo se encarga de analizar las distancias físicas entre todos los
-# vehículos en pantalla. Su meta es detectar cuándo los autos están formando un 
-# "pelotón" (grupo) porque van muy pegados.
+# vehículos en pantalla. Su meta es detectar cuándo los autos están formando un (grupo) porque van muy pegados.
 
 import numpy as np
 from sklearn.cluster import DBSCAN
@@ -17,7 +16,6 @@ def detect_traffic_clusters(vehiculos_detectados, dimensiones_frame):
         return {}
     
     alto, ancho = dimensiones_frame[:2]
-    # Extraemos solo las coordenadas (X, Y) de cada auto detectado
     centros = np.array([v["center"] for v in vehiculos_detectados])
     
     # PARAMETRO 1: Epsilon (eps)
@@ -33,10 +31,8 @@ def detect_traffic_clusters(vehiculos_detectados, dimensiones_frame):
     
     grupos = {}
     for i, etiqueta in enumerate(db.labels_):
-        # DBSCAN asigna la etiqueta -1 al "ruido" (autos que van solos o en parejas)
         if etiqueta == -1: continue 
         
-        # Si la etiqueta es 0, 1, 2, etc... significa que pertenece a un grupo válido
         nombre_grupo = f"Congestion_{etiqueta}"
         if nombre_grupo not in grupos:
             grupos[nombre_grupo] = []

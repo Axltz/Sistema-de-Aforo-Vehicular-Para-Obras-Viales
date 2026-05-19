@@ -133,6 +133,5 @@ while cap.isOpened():
             export_summary_json(result["metrics"])
             print("¡Resumen exportado exitosamente a data/json/traffic_data.json!")
 
-# Apagar cámaras y destruir pantallas gráficas al terminar
 cap.release()
 cv2.destroyAllWindows()

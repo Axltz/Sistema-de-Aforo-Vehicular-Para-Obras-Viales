@@ -14,7 +14,7 @@ def create_system_state():
         "calibration_locked": False, 
         "calibration_frames": 0,
         "orientation": "vertical",
-        "flow_direction": 1, # Hacia abajo por defecto
+        "flow_direction": 1,
         "line": {"start": (0, 0), "end": (0, 0)} 
     }
 
@@ -54,7 +54,7 @@ def calibrate_system(vehiculos_detectados, dimensiones_frame, estado):
                 # Recortamos ajustado arriba (donde salen) y dejamos margen abajo (de donde vienen)
                 margen_top = 20
                 margen_bottom = 150
-                cy = min_y + 0.2 * (max_y - min_y) # 20% de la trayectoria (cerca del tope de salida)
+                cy = min_y + 0.2 * (max_y - min_y) 
             else: # Bajando
                 # Recortamos ajustado abajo (donde salen) y dejamos margen arriba (de donde vienen)
                 margen_top = 150
