@@ -58,34 +58,89 @@
   <!-- ============================================================ -->
   <main id="app-main">
 
-    <!-- ========== TOP BAR: Video Source Selector ========== -->
-    <section class="source-selector glass-panel" id="source-selector">
-      <h2 class="section-title"><span class="section-icon">📡</span> Fuente de Video</h2>
-      <div class="source-buttons">
-        <button class="btn-source active" id="btn-preloaded" data-source="preloaded">
-          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-          Video Precargado
-        </button>
-        <button class="btn-source" id="btn-stream" data-source="stream">
-          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M16.24 7.76a6 6 0 010 8.49m-8.48-8.49a6 6 0 000 8.49M20.48 3.51a11 11 0 010 16.97M3.51 3.51a11 11 0 000 16.97"/></svg>
-          Stream en Vivo
-        </button>
+    <!-- ========== LOCAL SERVER NOTICE ========== -->
+    <section class="local-server-notice glass-panel hidden" id="local-server-notice">
+      <div class="notice-header">
+        <span class="notice-icon">⚠️</span>
+        <h2 class="notice-title">Servidor Local Requerido</h2>
       </div>
-      <div class="source-config" id="source-config-preloaded">
-        <label class="input-label" for="video-file-input">Seleccionar archivo de video:</label>
-        <div class="file-input-wrapper">
-          <input type="file" id="video-file-input" accept="video/*" />
-          <span class="file-input-text" id="file-input-text">Arrastra o selecciona un archivo .mp4</span>
-        </div>
-      </div>
-      <div class="source-config hidden" id="source-config-stream">
-        <label class="input-label" for="stream-url-input">URL del stream (RTSP / HTTP):</label>
-        <div class="stream-input-wrapper">
-          <input type="text" id="stream-url-input" placeholder="rtsp://192.168.1.100:554/stream" />
-          <button class="btn-neon btn-sm" id="btn-connect-stream">Conectar</button>
+      <div class="notice-body">
+        <p id="notice-protocol-msg">El navegador está bloqueando las peticiones de datos locales debido a políticas de seguridad (CORS).</p>
+        <p>Para ver los datos en tiempo real y el historial, sigue estos pasos:</p>
+        <div class="notice-steps">
+          <div class="step-card">
+            <span class="step-num">1</span>
+            <div class="step-text">
+              <strong>Abrir Terminal:</strong> Abre una terminal en la carpeta raíz del proyecto: <code>sistema-aforo-vehicular-obras-viales</code>.
+            </div>
+          </div>
+          <div class="step-card">
+            <span class="step-num">2</span>
+            <div class="step-text">
+              <strong>Iniciar Servidor:</strong> Ejecuta el comando:
+              <pre><code>python -m http.server 8080</code></pre>
+            </div>
+          </div>
+          <div class="step-card">
+            <span class="step-num">3</span>
+            <div class="step-text">
+              <strong>Cargar Dashboard:</strong> Abre tu navegador en la URL del servidor local:
+              <a href="http://localhost:8080/frontend/src/index.html" class="notice-link" target="_blank">http://localhost:8080/frontend/src/index.html</a>
+            </div>
+          </div>
         </div>
       </div>
     </section>
+
+    <!-- ========== MONITOR & SOURCE SECTION ========== -->
+    <div class="monitor-grid">
+      <!-- ========== VIDEO MONITOR PANEL ========== -->
+      <section class="video-monitor-panel glass-panel" id="video-monitor-panel">
+        <h2 class="section-title"><span class="section-icon">📹</span> Monitor CCTV en Tiempo Real</h2>
+        <div class="video-container">
+          <video id="dashboard-video" autoplay loop muted playsinline src="../../data/videos/trafico3.mp4"></video>
+          <img id="dashboard-live-frame" class="hidden" src="" alt="CCTV Stream" />
+          <div class="video-overlay" id="video-overlay">
+            <div class="overlay-badge" id="video-status-badge">DEMO - SIMULADO</div>
+            <div class="overlay-stats">
+              <span id="overlay-time">00:00:00</span>
+              <span id="overlay-fps">FPS: 30</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== TOP BAR: Video Source Selector ========== -->
+      <section class="source-selector glass-panel" id="source-selector">
+        <h2 class="section-title"><span class="section-icon">📡</span> Fuente de Video</h2>
+        <div class="source-buttons">
+          <button class="btn-source active" id="btn-preloaded" data-source="preloaded">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            Video Local/Demo
+          </button>
+          <button class="btn-source" id="btn-stream" data-source="stream">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M16.24 7.76a6 6 0 010 8.49m-8.48-8.49a6 6 0 000 8.49M20.48 3.51a11 11 0 010 16.97M3.51 3.51a11 11 0 000 16.97"/></svg>
+            Cámara IP
+          </button>
+        </div>
+        <div class="source-config" id="source-config-preloaded">
+          <label class="input-label" for="video-file-input">Cargar archivo de video local:</label>
+          <div class="file-input-wrapper">
+            <input type="file" id="video-file-input" accept="video/*" />
+            <span class="file-input-text" id="file-input-text">Arrastra o selecciona un archivo .mp4</span>
+          </div>
+          <p class="source-help-text">Al seleccionar un video, se reproducirá en el monitor superior y se iniciará una simulación interactiva inteligente en tiempo real.</p>
+        </div>
+        <div class="source-config hidden" id="source-config-stream">
+          <label class="input-label" for="stream-url-input">URL del stream de Cámara IP (RTSP / HTTP):</label>
+          <div class="stream-input-wrapper">
+            <input type="text" id="stream-url-input" placeholder="rtsp://192.168.1.100:554/stream" />
+            <button class="btn-neon btn-sm" id="btn-connect-stream">Conectar</button>
+          </div>
+          <p class="source-help-text">Para flujos de cámaras de red en vivo.</p>
+        </div>
+      </section>
+    </div>
 
     <!-- ========== METRICS CARDS ========== -->
     <section class="metrics-grid" id="metrics-grid">

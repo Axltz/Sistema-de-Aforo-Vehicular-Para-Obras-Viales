@@ -10,9 +10,13 @@ const state = {
   activeChart: "flow",    // flow | density | vehicles
   sparkData: { total: [], scene: [], flow: [] },
   lastHuffmanBlob: null,
+  realServerConnected: false, // Indica si hay conexión real con Python
 };
 
 let lastMetricId = null;  // Para evitar redibujar datos idénticos
+let simulationInterval = null;
+let simulationTotalCount = 0;
+let liveFrameInterval = null; // Intervalo que refresca la imagen YOLO en vivo
 
 // ===== DOM REFERENCES =====
 const $ = (id) => document.getElementById(id);
@@ -33,6 +37,9 @@ const dom = {
   clock:          $("clock"),
   fileInput:      $("video-file-input"),
   fileInputText:  $("file-input-text"),
+  videoPlayer:    $("dashboard-video"),
+  liveFrame:      $("dashboard-live-frame"),
+  videoBadge:     $("video-status-badge"),
 };
 
 // ===== CLOCK =====
@@ -480,6 +487,30 @@ async function pollLiveMetrics() {
     if (!response.ok) throw new Error("Archivo live no disponible");
     const row = await response.json();
     
+    // Si logramos conectar al servidor real, apagar la simulación y arrancar frame vivo
+    if (!state.realServerConnected) {
+      state.realServerConnected = true;
+      if (simulationInterval) {
+        clearInterval(simulationInterval);
+        simulationInterval = null;
+      }
+      // Ocultar video crudo, mostrar imagen YOLO procesada
+      if (dom.videoPlayer) dom.videoPlayer.classList.add("hidden");
+      if (dom.liveFrame)  dom.liveFrame.classList.remove("hidden");
+      if (dom.videoBadge) {
+        dom.videoBadge.textContent = "YOLO EN VIVO";
+        dom.videoBadge.className = "overlay-badge live-active";
+      }
+      // Iniciar refresco de frame cada 120ms
+      if (!liveFrameInterval) {
+        liveFrameInterval = setInterval(() => {
+          if (dom.liveFrame) {
+            dom.liveFrame.src = "../../data/live_frame.jpg?t=" + Date.now();
+          }
+        }, 120);
+      }
+    }
+    
     // Actualizar solo ante nuevos IDs
     if (row && row.id !== lastMetricId) {
       lastMetricId = row.id;
@@ -495,13 +526,159 @@ async function pollLiveMetrics() {
       setConnected(true);
     }
   } catch (err) {
+    // Si el servidor cae, volver al video demo
+    if (state.realServerConnected) {
+      state.realServerConnected = false;
+      if (liveFrameInterval) {
+        clearInterval(liveFrameInterval);
+        liveFrameInterval = null;
+      }
+      if (dom.liveFrame)  dom.liveFrame.classList.add("hidden");
+      if (dom.videoPlayer) dom.videoPlayer.classList.remove("hidden");
+    }
     setConnected(false, "Buscando backend...");
+    // Si no hemos iniciado la simulación, activarla
+    if (!simulationInterval) {
+      startSimulationMode();
+    }
+  }
+}
+
+// ===== HIGH FIDELITY SIMULATION FALLBACK MODE =====
+function startSimulationMode() {
+  if (simulationInterval) clearInterval(simulationInterval);
+  
+  if (dom.videoBadge) {
+    dom.videoBadge.textContent = "DEMO - SIMULADO";
+    dom.videoBadge.className = "overlay-badge";
+  }
+  
+  // Limpiar historial previo para coincidir con la simulación del nuevo video
+  state.metricsHistory = [];
+  state.sparkData = { total: [], scene: [], flow: [] };
+  dom.metricsTbody.innerHTML = "";
+  
+  simulationTotalCount = 0;
+  
+  function tickSimulation() {
+    const isHighTraffic = Math.sin(Date.now() / 60000) > 0.1;
+    const totalVehicles = Math.floor(Math.random() * (isHighTraffic ? 8 : 4)) + (isHighTraffic ? 6 : 2);
+    
+    const increment = Math.random() > 0.65 ? (Math.random() > 0.85 ? 2 : 1) : 0;
+    simulationTotalCount += increment;
+    
+    const flowRate = totalVehicles * (1.2 + Math.random() * 0.4);
+    const interactionPct = Math.min(100, (totalVehicles * 7.2) + (Math.random() * 8));
+    
+    const fluidez = totalVehicles > 11 ? "CONGESTION MODERADA" : (totalVehicles > 7 ? "CONGESTION LEVE" : "FLUJO LIBRE");
+    const velocidad = totalVehicles > 11 ? "MARCHA LENTA" : "MARCHA FLUIDA";
+    const alerta = totalVehicles > 11;
+    
+    const clusters = [];
+    if (totalVehicles > 6) {
+      clusters.push({
+        nombre: "Grupo A",
+        conteo: Math.floor(totalVehicles * 0.45) + 1,
+        riesgo: totalVehicles > 10 ? "ALTO" : "BAJO"
+      });
+    }
+    if (totalVehicles > 10) {
+      clusters.push({
+        nombre: "Grupo B",
+        conteo: Math.floor(totalVehicles * 0.3) + 1,
+        riesgo: "ALTO"
+      });
+    }
+    
+    const mockRow = {
+      id: "sim-" + Date.now(),
+      ts: Date.now(),
+      total_count: simulationTotalCount,
+      data: {
+        total_vehicles: totalVehicles,
+        flujo_por_minuto: flowRate,
+        interaccion_pct: interactionPct,
+        fluidez_avance: fluidez,
+        velocidad_marcha: velocidad,
+        alerta_embotellamiento: alerta,
+        cluster_metrics: clusters
+      }
+    };
+    
+    updateDashboard(mockRow);
+    addTableRow(mockRow);
+    
+    state.metricsHistory.push(mockRow);
+    if (state.metricsHistory.length > 200) state.metricsHistory.shift();
+    
+    rebuildMainChart();
+    updateHoursChart();
+  }
+  
+  tickSimulation();
+  simulationInterval = setInterval(tickSimulation, 2000);
+}
+
+// ===== LOCAL SERVER DETECTOR & WARNINGS =====
+function checkLocalServerStatus(ok) {
+  const noticeEl = $("local-server-notice");
+  if (!noticeEl) return;
+  const protocolMsgEl = $("notice-protocol-msg");
+  const titleEl = noticeEl.querySelector(".notice-title");
+
+  // Si se abre con protocolo file://
+  if (window.location.protocol === "file:") {
+    noticeEl.classList.remove("hidden");
+    titleEl.textContent = "Servidor Local Requerido (Protocolo File Detectado)";
+    if (protocolMsgEl) {
+      protocolMsgEl.innerHTML = `El navegador está bloqueando las peticiones de datos en tiempo real debido a restricciones de seguridad (<strong>CORS</strong>) al abrir el archivo HTML directamente como doble clic.`;
+    }
+    
+    // Mantener la visualización original de los pasos para iniciar el servidor
+    const steps = noticeEl.querySelectorAll(".notice-steps .step-card");
+    if (steps.length >= 3) {
+      steps[0].querySelector("strong").textContent = "Abrir Terminal:";
+      steps[0].querySelector(".step-text").innerHTML = `<strong>Abrir Terminal:</strong> Abre una terminal en la carpeta raíz del proyecto: <code>sistema-aforo-vehicular-obras-viales</code>.`;
+      
+      steps[1].querySelector("strong").textContent = "Iniciar Servidor:";
+      steps[1].querySelector(".step-text").innerHTML = `<strong>Iniciar Servidor:</strong> Inicia el servidor HTTP de Python ejecutando: <pre><code>python -m http.server 8080</code></pre>`;
+      
+      steps[2].querySelector("strong").textContent = "Cargar Dashboard:";
+      steps[2].querySelector(".step-text").innerHTML = `<strong>Cargar Dashboard:</strong> Abre tu navegador e ingresa a la siguiente URL local: <a href="http://localhost:8080/frontend/src/index.html" class="notice-link" target="_blank">http://localhost:8080/frontend/src/index.html</a>`;
+    }
+    return;
+  }
+
+  // Si se abre vía localhost (HTTP) pero no se encuentran los datos
+  if (!ok) {
+    noticeEl.classList.remove("hidden");
+    titleEl.textContent = "Esperando Datos de la Simulación";
+    if (protocolMsgEl) {
+      protocolMsgEl.innerHTML = `El servidor HTTP local está activo y respondiendo, pero <strong>no se encuentra el archivo de datos en tiempo real</strong> (<code>data/metrics_live.json</code>).`;
+    }
+    
+    // Cambiar las instrucciones para iniciar el procesamiento
+    const steps = noticeEl.querySelectorAll(".notice-steps .step-card");
+    if (steps.length >= 3) {
+      steps[0].querySelector("strong").textContent = "Iniciar Procesamiento:";
+      steps[0].querySelector(".step-text").innerHTML = `<strong>Iniciar Procesamiento:</strong> Abre una terminal en la raíz y ejecuta el script de detección en Python: <pre><code>python src/main.py</code></pre>`;
+      
+      steps[1].querySelector("strong").textContent = "Generar Métricas:";
+      steps[1].querySelector(".step-text").innerHTML = `<strong>Generar Métricas:</strong> El procesamiento de video escribirá periódicamente las métricas en <code>data/metrics_live.json</code>.`;
+      
+      steps[2].querySelector("strong").textContent = "Conexión Automática:";
+      steps[2].querySelector(".step-text").innerHTML = `<strong>Conexión Automática:</strong> El dashboard detectará el archivo y se actualizará automáticamente sin necesidad de recargar la página.`;
+    }
+  } else {
+    // Si todo está correcto y se reciben métricas, ocultar el aviso
+    noticeEl.classList.add("hidden");
   }
 }
 
 function setConnected(ok, errMsg) {
   dom.connStatus.className = "status-indicator " + (ok ? "connected" : "error");
   dom.connText.textContent = ok ? "Servidor Local" : (errMsg || "Error");
+  checkLocalServerStatus(ok);
 }
 
 // ===== VIDEO SOURCE SELECTOR =====
@@ -520,9 +697,32 @@ dom.fileInput.addEventListener("change", (e) => {
   if (file) {
     dom.fileInputText.textContent = `📁 ${file.name} (${(file.size / 1024 / 1024).toFixed(1)} MB)`;
     dom.fileInputText.style.color = "#00e5ff";
-    alert(`Nota: Para procesar '${file.name}', cópialo a 'data/videos/' y ejecuta en tu terminal:\n\npython src/main.py --video data/videos/${file.name}`);
+    
+    // Cargar y reproducir el video de forma local e instantánea en el monitor superior
+    const url = URL.createObjectURL(file);
+    if (dom.videoPlayer) {
+      dom.videoPlayer.src = url;
+      dom.videoPlayer.play();
+    }
+    
+    // Iniciar simulación automática si no estamos conectados al backend real de Python
+    if (!state.realServerConnected) {
+      startSimulationMode();
+    }
   }
 });
+
+// Actualizar el cronómetro del monitor CCTV del video
+function updateCCTVClock() {
+  const overlayTimeEl = $("overlay-time");
+  if (!overlayTimeEl || !dom.videoPlayer) return;
+  const sec = Math.floor(dom.videoPlayer.currentTime || 0);
+  const hrs = Math.floor(sec / 3600).toString().padStart(2, '0');
+  const mins = Math.floor((sec % 3600) / 60).toString().padStart(2, '0');
+  const secs = (sec % 60).toString().padStart(2, '0');
+  overlayTimeEl.textContent = `${hrs}:${mins}:${secs}`;
+}
+setInterval(updateCCTVClock, 500);
 
 $("btn-connect-stream").addEventListener("click", () => {
   const url = $("stream-url-input").value.trim();
@@ -701,6 +901,9 @@ function downloadBlob(blob, filename) {
 
 // ===== INIT =====
 (async function init() {
+  // Verificar protocolo local al inicio de forma instantánea
+  checkLocalServerStatus(window.location.protocol !== "file:");
+
   // Cargar historial inicial diario
   await fetchDailyLog();
   

@@ -84,6 +84,8 @@ while cap.isOpened():
                 if mov >= 0:
                     vehiculos_detectados.append(v)
             state["last_detections"] = vehiculos_detectados
+            # Solo guardamos el frame cuando YOLO corrió y hay algo nuevo que mostrar
+            cv2.imwrite("data/live_frame.jpg", frame)
         else:
             # Si nos saltamos el frame, heredamos las detecciones previas
             vehiculos_detectados = state["last_detections"]
@@ -105,7 +107,8 @@ while cap.isOpened():
     frame_recortado = frame[roi["y1"]:roi["y2"], roi["x1"]:roi["x2"]]
     
     # PASO C: DETECCIÓN CON SALTO DE FRAMES (FRAME SKIPPING)
-    if frame_count % FRAME_SKIP_FACTOR == 0 or "last_detections" not in state:
+    yolo_ran_this_frame = (frame_count % FRAME_SKIP_FACTOR == 0 or "last_detections" not in state)
+    if yolo_ran_this_frame:
         vehiculos_sucios = frame_detection(frame_recortado)
         
         # Filtramos por dirección de avance
@@ -151,6 +154,9 @@ while cap.isOpened():
     # Renderizar en pantalla
     cv2.imshow("Sistema de Trafico - Vista Principal", frame_with_overlay)
     cv2.imshow("Dashboard de Control", dashboard)
+    # Solo guardar cuando YOLO corrió: el frame cambió visualmente
+    if yolo_ran_this_frame:
+        cv2.imwrite("data/live_frame.jpg", frame_with_overlay)
 
     # PASO G: TECLADO DE CONTROL
     key = cv2.waitKey(1) & 0xFF
