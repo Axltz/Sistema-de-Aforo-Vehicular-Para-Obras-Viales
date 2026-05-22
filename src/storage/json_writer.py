@@ -2,52 +2,75 @@ import json
 import os
 import time
 from datetime import datetime
+from src.config import METRICS_LIVE_PATH, LOGS_DIR
 
-def save_metrics_to_json(metrics):
+def save_metrics_local(metrics, append_to_log=False):
     """
-    Guarda las métricas calculadas en un archivo JSON línea por línea (JSONL).
-    El archivo se nombra automáticamente por día.
+    Guarda las métricas en data/metrics_live.json (sobrescrito)
+    y acumula en data/logs/metrics_YYYY-MM-DD.jsonl (historial diario) si append_to_log es True.
+    La estructura de datos es 100% compatible con el formato de Supabase anterior.
     """
-    log_dir = "data/logs"
-    if not os.path.exists(log_dir):
-        os.makedirs(log_dir)
+    # Asegurar que existan los directorios
+    os.makedirs(LOGS_DIR, exist_ok=True)
+    if METRICS_LIVE_PATH.parent:
+        os.makedirs(METRICS_LIVE_PATH.parent, exist_ok=True)
         
-    fecha_hoy = datetime.now().strftime("%Y-%m-%d")
-    log_file = os.path.join(log_dir, f"metrics_{fecha_hoy}.jsonl")
+    now = datetime.now()
+    ts_iso = now.isoformat()
+    msg_id = int(time.time() * 1000)
     
-    # Preparamos un diccionario limpio para guardar
-    data_to_save = {
-        "timestamp": time.time(),
-        "fecha_hora": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-        "total_vehicles": metrics.get("total_vehicles", 0),
+    # Estructura unificada compatible con lo que app.js espera
+    payload = {
+        "id": msg_id,
+        "ts": ts_iso,
         "total_count": metrics.get("total_count", 0),
-        "flow_per_minute": metrics.get("flujo_por_minuto", 0),
-        "interaction_density": metrics.get("interaccion_pct", 0),
-        "traffic_state": metrics.get("fluidez_avance", "N/A"),
-        "congestion_alert": metrics.get("alerta_embotellamiento", False),
-        "clusters": []
+        "data": {
+            "total_vehicles": metrics.get("total_vehicles", 0),
+            "flujo_por_minuto": metrics.get("flujo_por_minuto", 0.0),
+            "interaccion_pct": metrics.get("interaccion_pct", 0.0),
+            "fluidez_avance": metrics.get("fluidez_avance", "N/A"),
+            "velocidad_marcha": metrics.get("velocidad_marcha", "N/A"),
+            "alerta_embotellamiento": metrics.get("alerta_embotellamiento", False),
+            "cluster_metrics": []
+        }
     }
     
-    for data in metrics.get("cluster_metrics", []):
-        data_to_save["clusters"].append({
-            "name": data["nombre"],
-            "count": data["conteo"],
-            "risk": data["riesgo"]
+    # Mapear los clusters para mantener compatibilidad
+    for c in metrics.get("cluster_metrics", []):
+        payload["data"]["cluster_metrics"].append({
+            "nombre": c.get("nombre", c.get("name", "")),
+            "conteo": c.get("conteo", c.get("count", 0)),
+            "riesgo": c.get("riesgo", c.get("risk", "BAJO"))
         })
         
-    with open(log_file, "a", encoding="utf-8") as f:
-        f.write(json.dumps(data_to_save) + "\n")
+    # 1. Guardar/sobrescribir el estado en vivo
+    try:
+        with open(METRICS_LIVE_PATH, "w", encoding="utf-8") as f:
+            json.dump(payload, f, indent=2, ensure_ascii=False)
+    except Exception as e:
+        print(f"⚠️ Error al escribir metrics_live.json: {e}")
+        
+    # 2. Acumular en el log histórico diario (.jsonl) solo si corresponde
+    if append_to_log:
+        fecha_hoy = now.strftime("%Y-%m-%d")
+        log_file = LOGS_DIR / f"metrics_{fecha_hoy}.jsonl"
+        
+        try:
+            with open(log_file, "a", encoding="utf-8") as f:
+                f.write(json.dumps(payload, ensure_ascii=False) + "\n")
+        except Exception as e:
+            print(f"⚠️ Error al escribir en el historial jsonl: {e}")
+
 
 def export_summary_json(metrics):
     """
     Exporta un resumen bonito e instantáneo de la situación actual.
     Se ejecuta cuando el usuario presiona la tecla 'E'.
     """
-    export_dir = "data/json"
-    if not os.path.exists(export_dir):
-        os.makedirs(export_dir)
+    export_dir = LOGS_DIR.parent / "json"
+    os.makedirs(export_dir, exist_ok=True)
         
-    export_file = os.path.join(export_dir, "traffic_data.json")
+    export_file = export_dir / "traffic_data.json"
     
     resumen = {
         "reporte_generado": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
@@ -58,5 +81,8 @@ def export_summary_json(metrics):
         "riesgo_de_embotellamiento": metrics.get("alerta_embotellamiento", False)
     }
     
-    with open(export_file, "w", encoding="utf-8") as f:
-        json.dump(resumen, f, indent=4, ensure_ascii=False)
+    try:
+        with open(export_file, "w", encoding="utf-8") as f:
+            json.dump(resumen, f, indent=4, ensure_ascii=False)
+    except Exception as e:
+        print(f"⚠️ Error al exportar resumen JSON: {e}")

@@ -464,8 +464,12 @@ body {
 /* ===== CHARTS ===== */
 .charts-section {
   display: grid;
-  grid-template-columns: 2fr 1fr;
+  grid-template-columns: 1fr 1fr;
   gap: 1.5rem;
+}
+
+#chart-flow-panel {
+  grid-column: 1 / -1;
 }
 
 .chart-panel {
@@ -806,9 +810,9 @@ body {
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/* ===== RESPONSIVE ===== */
 @media (max-width: 1024px) {
   .charts-section { grid-template-columns: 1fr; }
+  #chart-flow-panel { grid-column: 1; }
   #app-main { padding: 1rem; }
 }
 

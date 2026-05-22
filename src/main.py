@@ -1,82 +1,114 @@
 # ==============================================================================
-# main.py - PUNTO DE ENTRADA DEL SISTEMA
+# main.py - PUNTO DE ENTRADA DEL SISTEMA (VERSIÓN 100% LOCAL & OFFLINE)
 # ==============================================================================
-# Este archivo es el "motor" principal. Su trabajo es abrir el video, leer los
-# frames uno por uno, y mandar llamar a todos los demás módulos (detección, conteo, 
-# inteligencia, gráficas) en el orden correcto.
+# Este archivo es el "motor" principal. Su trabajo es abrir la fuente de video 
+# (archivo .mp4 o webcam), leer los frames, ejecutar la detección optimizada 
+# (con frame skipping) y escribir los resultados en archivos JSON/JSONL locales.
 
 import cv2
 import numpy as np
-from supabase import create_client
-from src.config import SUPABASE_URL, SUPABASE_ANON_KEY
+import argparse
+import sys
 
+from src.config import DEFAULT_VIDEO_PATH, FRAME_SKIP_FACTOR
 from src.detection.detection import frame_detection
 from src.pipeline.pipeline import process_frame
 from src.analytics.processing import create_system_state, count_vehicles, calibrate_system
-from src.storage.json_writer import save_metrics_to_json
+from src.storage.json_writer import save_metrics_local, export_summary_json
 from src.visualization.overlay import draw_overlay
 
-# Inicializar cliente Supabase
-supabase_client = create_client(SUPABASE_URL, SUPABASE_ANON_KEY)
+# 1. PARSEAR ARGUMENTOS DE CONSOLA
+parser = argparse.ArgumentParser(description="Sistema Inteligente de Aforo Vehicular para Obras Viales")
+parser.add_argument("--webcam", action="store_true", help="Usar la webcam en tiempo real en lugar de un archivo de video")
+parser.add_argument("--video", type=str, default=DEFAULT_VIDEO_PATH, help="Ruta del archivo de video a procesar")
+args = parser.parse_args()
 
+# Seleccionar fuente
+if args.webcam:
+    video_source = 0
+    print("🎥 FUENTE CONFIGURADA: Webcam en tiempo real (Canal 0)")
+else:
+    video_source = args.video
+    print(f"🎬 FUENTE CONFIGURADA: Archivo de video '{video_source}'")
 
-def insert_metric(total_count: int, extra_data: dict):
-    """Inserta una fila en la tabla Supabase `metrics`."""
-    # Limpiar datos no serializables (sets → listas)
-    clean_data = {}
-    for k, v in extra_data.items():
-        if isinstance(v, set):
-            clean_data[k] = list(v)
-        elif k == "prev_ids_pos":
-            continue  # No necesitamos esto en la BD
-        else:
-            clean_data[k] = v
-    payload = {
-        "total_count": total_count,
-        "data": clean_data
-    }
-    try:
-        supabase_client.table("metrics").insert(payload).execute()
-        print("✅ Métricas subidas a Supabase")
-    except Exception as e:
-        print(f"⚠️ Error al subir métricas: {e}")
+# 2. CARGAR EL VIDEO / CÁMARA
+cap = cv2.VideoCapture(video_source)
+if not cap.isOpened():
+    print(f"❌ Error: No se pudo abrir la fuente de video: {video_source}")
+    sys.exit(1)
 
-
-# 1. CARGAR EL VIDEO
-video_path = "data/videos/trafico3.mp4"
-cap = cv2.VideoCapture(video_path)
-
-# 2. INICIALIZAR LA MEMORIA
-# 'state' es un diccionario que actúa como el cerebro a corto plazo del sistema.
-# Guarda el conteo total, el historial de posiciones de los autos, la línea de cruce, etc.
+# 3. INICIALIZAR LA MEMORIA DE RASTREO
 state = create_system_state()
 
 frame_count = 0
-result = None # Aquí guardaremos el diagnóstico inteligente de tráfico
+result = None  # Aquí guardaremos el diagnóstico inteligente de tráfico
 
-# BUCLE PRINCIPAL: Se repite infinitamente hasta que se acabe el video o presiones 'Q'
+# BUCLE PRINCIPAL: Lee y procesa los frames secuencialmente
 while cap.isOpened():
-
-    # Leer un frame (una fotografía instantánea del video)
     ret, frame = cap.read()
     if not ret:
-        # Si el video termina, lo reiniciamos al inicio (bucle infinito para pruebas)
-        cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
-        continue
+        if args.webcam:
+            print("⚠️ Se perdió la conexión con la webcam.")
+            break
+        else:
+            # Si el video termina, lo reiniciamos (bucle infinito de demo)
+            cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
+            continue
 
-    # Redimensionar el video para que no sea muy pesado para la computadora
+    # Redimensionar el frame para optimizar visualización y velocidad
     h_orig, w_orig = frame.shape[:2]
     aspect = h_orig / w_orig
     frame = cv2.resize(frame, (1024, int(1024 * aspect)))
 
     frame_count += 1
 
-    # PASO A: CONDICIONAL DE CALIBRACIÓN O DETECCIÓN CON RECORTE PREVIO
+    # ==========================================================================
+    # PASO A: CONDICIONAL DE CALIBRACIÓN CON SALTO DE FRAMES
+    # ==========================================================================
     if not state["calibration_locked"]:
-        # Durante la calibración, usamos todo el frame original para encontrar por dónde pasan los autos
-        vehiculos_sucios = frame_detection(frame)
+        # Corremos YOLO solo en frames seleccionados para ahorrar recursos
+        if frame_count % FRAME_SKIP_FACTOR == 0 or "last_detections" not in state:
+            vehiculos_sucios = frame_detection(frame)
+            
+            # Filtramos por sentido de flujo inicial
+            vehiculos_detectados = []
+            for v in vehiculos_sucios:
+                vid, curr = v["id"], np.array(v["center"])
+                prev = np.array(state["ids_history"].get(vid, curr))
+                
+                if state["orientation"] == "vertical":
+                    mov = (curr[1] - prev[1]) * state["flow_direction"]
+                else:
+                    mov = (curr[0] - prev[0]) * state["flow_direction"]
+                    
+                if mov >= 0:
+                    vehiculos_detectados.append(v)
+            state["last_detections"] = vehiculos_detectados
+        else:
+            # Si nos saltamos el frame, heredamos las detecciones previas
+            vehiculos_detectados = state["last_detections"]
+            
+        calibrate_system(vehiculos_detectados, frame.shape, state)
+        cv2.putText(frame, f"CALIBRANDO FLUJO... {state['calibration_frames']}/30", (50, 50), 
+                    cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 2)
+
+        cv2.imshow("Sistema de Trafico - Vista Principal", frame)
+        if cv2.waitKey(1) & 0xFF == ord('q'): 
+            break
+        continue
+
+    # ==========================================================================
+    # SISTEMA YA CALIBRADO: PROCESAMIENTO OPTIMIZADO CON RECORTE Y SKIP-YOLO
+    # ==========================================================================
+    # PASO B: RECORTE DEL FRAME (Reduce drásticamente el área que procesa YOLO)
+    roi = state["active_roi"]
+    frame_recortado = frame[roi["y1"]:roi["y2"], roi["x1"]:roi["x2"]]
+    
+    # PASO C: DETECCIÓN CON SALTO DE FRAMES (FRAME SKIPPING)
+    if frame_count % FRAME_SKIP_FACTOR == 0 or "last_detections" not in state:
+        vehiculos_sucios = frame_detection(frame_recortado)
         
-        # Filtramos por sentido del flujo crudo
+        # Filtramos por dirección de avance
         vehiculos_detectados = []
         for v in vehiculos_sucios:
             vid, curr = v["id"], np.array(v["center"])
@@ -89,82 +121,47 @@ while cap.isOpened():
                 
             if mov >= 0:
                 vehiculos_detectados.append(v)
-                
-        calibrate_system(vehiculos_detectados, frame.shape, state)
-        cv2.putText(frame, f"CALIBRANDO FLUJO... {state['calibration_frames']}/30", (50, 50), 
-                    cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 2)
+        state["last_detections"] = vehiculos_detectados
+    else:
+        # Heredamos las posiciones previas de los autos en el frame de salto
+        vehiculos_detectados = state["last_detections"]
 
-        cv2.imshow("Sistema de Trafico - Vista Principal", frame)
-        if cv2.waitKey(1) & 0xFF == ord('q'): break
-        continue
-
-    # ==========================================================================
-    # SISTEMA YA CALIBRADO: PROCESAMIENTO OPTIMIZADO CON RECORTE PRE-YOLO
-    # ==========================================================================
-    # PASO B: RECORTE DEL FRAME (Reducimos el tamaño de la imagen que procesará YOLO)
-    roi = state["active_roi"]
-    frame_recortado = frame[roi["y1"]:roi["y2"], roi["x1"]:roi["x2"]]
-    
-    # PASO C: YOLO EN IMAGEN RECORTADA (Mucho más veloz y preciso)
-    vehiculos_sucios = frame_detection(frame_recortado)
-    
-    # Filtramos los vehículos (en coordenadas del recorte)
-    vehiculos_detectados = []
-    for v in vehiculos_sucios:
-        vid, curr = v["id"], np.array(v["center"])
-        prev = np.array(state["ids_history"].get(vid, curr))
-        
-        if state["orientation"] == "vertical":
-            mov = (curr[1] - prev[1]) * state["flow_direction"]
-        else:
-            mov = (curr[0] - prev[0]) * state["flow_direction"]
-            
-        if mov >= 0:
-            vehiculos_detectados.append(v)
-
-    # PASO D: CONTADOR (Usa la línea adaptativa ya convertida a coordenadas de recorte)
+    # PASO D: CONTADOR VEHICULAR
     total_count, line = count_vehicles(vehiculos_detectados, state)
 
-    # PASO E: INTELIGENCIA DE TRÁFICO (El Cerebro)
-    # Corre sobre las coordenadas del recorte
+    # PASO E: INTELIGENCIA DE TRÁFICO (Cómputo cada 10 frames)
     if frame_count % 10 == 0 or result is None:
         result = process_frame(vehiculos_detectados, frame_recortado.shape, state)
         result["metrics"]["total_count"] = total_count
         
-        # REGISTRO HISTÓRICO EN SEGUNDO PLANO
-        if frame_count % 150 == 0:
-            save_metrics_to_json(result["metrics"])
-            # Subir métricas a Supabase
-            insert_metric(
-                total_count=result["metrics"].get("total_count", 0),
-                extra_data=result["metrics"]
-            )
+        # GUARDAR LOCALMENTE: Escribe live.json cada 10 frames y acumula jsonl cada 150
+        append_log = (frame_count % 150 == 0)
+        save_metrics_local(result["metrics"], append_to_log=append_log)
 
-    # PASO F: PINTAR LA PANTALLA
-    # Todo está en coordenadas locales del recorte, no requiere transformaciones
+    # PASO F: DIBUJAR CAPAS VISUALES (OVERLAYS)
     frame_with_overlay, dashboard = draw_overlay(frame_recortado, vehiculos_detectados, result)
 
-    # Inicializar el tamaño de las ventanas la primera vez
+    # Inicializar tamaño de las pantallas
     if frame_count == 1:
         cv2.namedWindow("Sistema de Trafico - Vista Principal", cv2.WINDOW_NORMAL)
         cv2.resizeWindow("Sistema de Trafico - Vista Principal", 800, int(800 * aspect))
         cv2.namedWindow("Dashboard de Control", cv2.WINDOW_NORMAL)
         cv2.resizeWindow("Dashboard de Control", 300, 500)
 
-    # Mostrar en el monitor
+    # Renderizar en pantalla
     cv2.imshow("Sistema de Trafico - Vista Principal", frame_with_overlay)
     cv2.imshow("Dashboard de Control", dashboard)
 
-    # PASO G: ESCUCHAR EL TECLADO
+    # PASO G: TECLADO DE CONTROL
     key = cv2.waitKey(1) & 0xFF
     if key == ord('q'):
-        break # Apagar el programa
+        break  # Apagar sistema
     elif key == ord('e') or key == ord('E'):
-        # Al presionar 'E', extrae el último diagnóstico y lo guarda en JSON
-        from src.storage.json_writer import export_summary_json
+        # Exportación manual de un reporte JSON bonito al presionar 'E'
         if result is not None:
             export_summary_json(result["metrics"])
-            print("¡Resumen exportado exitosamente a data/json/traffic_data.json!")
+            print("💾 ¡Resumen consolidado exportado a data/json/traffic_data.json!")
 
 cap.release()
 cv2.destroyAllWindows()
+print("👋 Sistema apagado correctamente.")

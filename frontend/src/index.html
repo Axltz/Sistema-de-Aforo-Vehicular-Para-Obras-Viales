@@ -13,10 +13,6 @@
 
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
-
-  <!-- Supabase JS SDK -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <link rel="stylesheet" href="styles/styles.css">
 </head>
@@ -165,6 +161,15 @@
         </div>
         <div class="chart-container">
           <canvas id="main-chart"></canvas>
+        </div>
+      </div>
+
+      <div class="chart-panel glass-panel" id="chart-hours-panel">
+        <div class="chart-header">
+          <h3 class="chart-title">Distribución de Horas Pico (Historial)</h3>
+        </div>
+        <div class="chart-container">
+          <canvas id="hours-chart"></canvas>
         </div>
       </div>
 

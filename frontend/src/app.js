@@ -1,22 +1,18 @@
 // ================================================================
-// AFORO VEHICULAR — DASHBOARD APP.JS
+// AFORO VEHICULAR — DASHBOARD APP.JS (VERSIÓN 100% LOCAL & OFFLINE)
 // ================================================================
-// Supabase Realtime + Chart.js + Huffman Compression + UI Logic
+// Polling local de JSON/JSONL + Chart.js + Compresión Huffman + UI
 // ================================================================
-
-// ===== SUPABASE CONFIG =====
-const SUPABASE_URL  = "https://aeospnvtmvgcffolnllr.supabase.co";
-const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFlb3NwbnZ0bXZnY2Zmb2xubGxyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkxNTU1NzMsImV4cCI6MjA5NDczMTU3M30.8Uupw8SzpDjEFXZFcihUAilD4QD57Fw490SzgwPEOvs";
-
-const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
 // ===== STATE =====
 const state = {
-  metricsHistory: [],     // All fetched rows
+  metricsHistory: [],     // Historial de métricas locales
   activeChart: "flow",    // flow | density | vehicles
   sparkData: { total: [], scene: [], flow: [] },
   lastHuffmanBlob: null,
 };
+
+let lastMetricId = null;  // Para evitar redibujar datos idénticos
 
 // ===== DOM REFERENCES =====
 const $ = (id) => document.getElementById(id);
@@ -87,7 +83,7 @@ updateClock();
       ctx.fillStyle = `rgba(0, 168, 255, ${p.alpha})`;
       ctx.fill();
     }
-    // Draw connections
+    // Conexiones de partículas
     for (let i = 0; i < particles.length; i++) {
       for (let j = i + 1; j < particles.length; j++) {
         const dx = particles[i].x - particles[j].x;
@@ -164,7 +160,50 @@ const mainChart = new Chart(mainChartCtx, {
   },
 });
 
-// Cluster doughnut chart
+// Gráfico de Barras de Horas Pico (NUEVO)
+const hoursChartCtx = $("hours-chart").getContext("2d");
+const hoursChart = new Chart(hoursChartCtx, {
+  type: "bar",
+  data: {
+    labels: Array.from({ length: 24 }, (_, i) => `${i.toString().padStart(2, '0')}:00`),
+    datasets: [{
+      label: "Vehículos Aforados",
+      data: Array(24).fill(0),
+      backgroundColor: "rgba(0, 229, 255, 0.25)",
+      borderColor: "#00e5ff",
+      borderWidth: 1.5,
+      borderRadius: 4,
+      hoverBackgroundColor: "rgba(0, 229, 255, 0.45)",
+    }],
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: "rgba(10,10,15,0.9)",
+        borderColor: "rgba(0,168,255,0.3)",
+        borderWidth: 1,
+        titleFont: { family: "Orbitron", size: 10 },
+        bodyFont: { family: "JetBrains Mono", size: 11 },
+      },
+    },
+    scales: {
+      x: {
+        grid: { color: "rgba(255,255,255,0.02)" },
+        ticks: { color: "#4a5568", font: { family: "JetBrains Mono", size: 8 } },
+      },
+      y: {
+        grid: { color: "rgba(255,255,255,0.02)" },
+        ticks: { color: "#4a5568", font: { family: "JetBrains Mono", size: 8 }, stepSize: 1 },
+        beginAtZero: true,
+      },
+    },
+  },
+});
+
+// Gráfico de agrupaciones (Rosquilla)
 const clusterChartCtx = $("cluster-chart").getContext("2d");
 const clusterChart = new Chart(clusterChartCtx, {
   type: "doughnut",
@@ -248,6 +287,32 @@ function rebuildMainChart() {
   mainChart.update();
 }
 
+// ===== CÁLCULO DE HORAS PICO =====
+function updateHoursChart() {
+  const hourlyVolume = {};
+  for (let h = 0; h < 24; h++) {
+    hourlyVolume[h] = 0;
+  }
+
+  let prevCount = null;
+  state.metricsHistory.forEach((row) => {
+    if (prevCount === null) {
+      prevCount = row.total_count ?? 0;
+      return;
+    }
+    const diff = (row.total_count ?? 0) - prevCount;
+    // Si hay un incremento real (sin contar caídas de reinicio de video)
+    if (diff > 0) {
+      const hour = new Date(row.ts).getHours();
+      hourlyVolume[hour] = (hourlyVolume[hour] || 0) + diff;
+    }
+    prevCount = row.total_count ?? 0;
+  });
+
+  hoursChart.data.datasets[0].data = Array.from({ length: 24 }, (_, h) => hourlyVolume[h]);
+  hoursChart.update();
+}
+
 // ===== UI UPDATE =====
 function updateDashboard(row) {
   const d = row.data || {};
@@ -264,10 +329,10 @@ function updateDashboard(row) {
   const pct = Math.min(100, d.interaccion_pct ?? 0);
   dom.progressBar.style.width = `${pct}%`;
 
-  // Colorize traffic state
+  // Colorear estado de la vía
   const stateEl = dom.trafficState;
   stateEl.style.setProperty("-webkit-text-fill-color", "");
-  if ((d.fluidez_avance || "").includes("CONGESTION")) {
+  if ((d.fluidez_avance || "").includes("CONGESTION") || (d.fluidez_avance || "").includes("EMBOTELLAMIENTO")) {
     stateEl.style.color = "#ff3d3d";
     stateEl.style.setProperty("-webkit-text-fill-color", "#ff3d3d");
   } else if ((d.fluidez_avance || "").includes("LIBRE")) {
@@ -278,7 +343,7 @@ function updateDashboard(row) {
     stateEl.style.setProperty("-webkit-text-fill-color", "#00e5ff");
   }
 
-  // Alert banner
+  // Alerta de embotellamiento
   if (d.alerta_embotellamiento) {
     dom.alertBanner.classList.remove("hidden");
   } else {
@@ -303,7 +368,7 @@ function updateDashboard(row) {
     `).join("");
   }
 
-  // Cluster doughnut
+  // Clusters Doughnut Chart
   const clLabels = clusters.length ? clusters.map((c) => c.nombre) : ["Sin riesgo"];
   const clData   = clusters.length ? clusters.map((c) => c.conteo) : [1];
   const clColors = clusters.map((c) =>
@@ -335,69 +400,108 @@ function addTableRow(row) {
     <td>${d.fluidez_avance ?? "—"}</td>
     <td>${alertEmoji}</td>
   `;
-  // Remove empty row
+  
   const emptyRow = dom.metricsTbody.querySelector(".empty-row");
   if (emptyRow) emptyRow.remove();
   dom.metricsTbody.prepend(tr);
-  // Keep max 50 rows
+  
+  // Límite de 50 filas
   while (dom.metricsTbody.children.length > 50) {
     dom.metricsTbody.removeChild(dom.metricsTbody.lastChild);
   }
 }
 
-// ===== SUPABASE DATA =====
-async function fetchInitialData() {
+// ===== LOCAL DATA POLLING & FETCH =====
+
+function getDailyLogPath() {
+  const now = new Date();
+  const yyyy = now.getFullYear();
+  const mm = String(now.getMonth() + 1).padStart(2, '0');
+  const dd = String(now.getDate()).padStart(2, '0');
+  return `../../data/logs/metrics_${yyyy}-${mm}-${dd}.jsonl`;
+}
+
+// Carga inicial del historial del día desde el .jsonl local
+async function fetchDailyLog() {
+  const path = getDailyLogPath();
   try {
-    const { data, error } = await sb
-      .from("metrics")
-      .select("*")
-      .order("ts", { ascending: true })
-      .limit(100);
-
-    if (error) throw error;
-
-    state.metricsHistory = data || [];
-
-    // Populate table
-    const reversed = [...(data || [])].reverse();
+    const response = await fetch(path);
+    if (!response.ok) {
+      console.warn("Aún no hay log histórico acumulado para hoy en:", path);
+      return;
+    }
+    const text = await response.text();
+    
+    // Parsear líneas de JSONL
+    const lines = text.split("\n");
+    const history = [];
+    for (const line of lines) {
+      if (line.trim()) {
+        try {
+          const row = JSON.parse(line);
+          history.push(row);
+        } catch (e) {
+          // Ignorar filas incompletas
+        }
+      }
+    }
+    
+    state.metricsHistory = history;
+    
+    // Repoblar la tabla
+    dom.metricsTbody.innerHTML = "";
+    const reversed = [...history].reverse();
     for (const row of reversed) {
       addTableRow(row);
     }
-
-    // Update dashboard with latest
-    if (data && data.length > 0) {
-      updateDashboard(data[data.length - 1]);
-    }
-
+    
+    // Rellenar sparklines iniciales
+    state.sparkData = { total: [], scene: [], flow: [] };
+    const sparkHistory = history.slice(-20);
+    sparkHistory.forEach((row) => {
+      const d = row.data || {};
+      state.sparkData.total.push(row.total_count ?? 0);
+      state.sparkData.scene.push(d.total_vehicles ?? 0);
+      state.sparkData.flow.push(d.flujo_por_minuto ?? 0);
+    });
+    
     rebuildMainChart();
+    updateHoursChart();
     setConnected(true);
   } catch (err) {
-    console.error("Error fetching initial data:", err);
-    setConnected(false, err.message);
+    console.warn("Error cargando historial local:", err.message);
   }
 }
 
-function subscribeToRealtime() {
-  sb.channel("metrics-realtime")
-    .on("postgres_changes", { event: "INSERT", schema: "public", table: "metrics" }, (payload) => {
-      const row = payload.new;
-      state.metricsHistory.push(row);
-      if (state.metricsHistory.length > 200) state.metricsHistory.shift();
-
+// Polling periódico del JSON live en tiempo real
+async function pollLiveMetrics() {
+  try {
+    const response = await fetch("../../data/metrics_live.json?t=" + Date.now());
+    if (!response.ok) throw new Error("Archivo live no disponible");
+    const row = await response.json();
+    
+    // Actualizar solo ante nuevos IDs
+    if (row && row.id !== lastMetricId) {
+      lastMetricId = row.id;
+      
       updateDashboard(row);
       addTableRow(row);
+      
+      state.metricsHistory.push(row);
+      if (state.metricsHistory.length > 200) state.metricsHistory.shift();
+      
       rebuildMainChart();
-    })
-    .subscribe((status) => {
-      if (status === "SUBSCRIBED") {
-        setConnected(true);
-      }
-    });
+      updateHoursChart();
+      setConnected(true);
+    }
+  } catch (err) {
+    setConnected(false, "Buscando backend...");
+  }
 }
 
 function setConnected(ok, errMsg) {
   dom.connStatus.className = "status-indicator " + (ok ? "connected" : "error");
-  dom.connText.textContent = ok ? "Conectado" : (errMsg || "Error");
+  dom.connText.textContent = ok ? "Servidor Local" : (errMsg || "Error");
 }
 
 // ===== VIDEO SOURCE SELECTOR =====
@@ -416,13 +520,14 @@ dom.fileInput.addEventListener("change", (e) => {
   if (file) {
     dom.fileInputText.textContent = `📁 ${file.name} (${(file.size / 1024 / 1024).toFixed(1)} MB)`;
     dom.fileInputText.style.color = "#00e5ff";
+    alert(`Nota: Para procesar '${file.name}', cópialo a 'data/videos/' y ejecuta en tu terminal:\n\npython src/main.py --video data/videos/${file.name}`);
   }
 });
 
 $("btn-connect-stream").addEventListener("click", () => {
   const url = $("stream-url-input").value.trim();
   if (!url) return alert("Ingresa una URL de stream válida");
-  alert(`Conexión a stream configurada: ${url}\n\nNota: El stream se procesará en el backend de Python. Asegúrate de que main.py use esta URL.`);
+  alert(`Cámara IP configurada.\n\nPara conectarla, abre una terminal y ejecuta:\n\npython src/main.py --video "${url}"`);
 });
 
 // ===== EXPORT JSON =====
@@ -434,15 +539,13 @@ $("btn-export-json").addEventListener("click", () => {
 
 // ===== REFRESH DATA =====
 $("btn-refresh-data").addEventListener("click", () => {
-  dom.metricsTbody.innerHTML = `<tr class="empty-row"><td colspan="7">Cargando datos...</td></tr>`;
+  dom.metricsTbody.innerHTML = `<tr class="empty-row"><td colspan="7">Cargando datos locales...</td></tr>`;
   state.metricsHistory = [];
   state.sparkData = { total: [], scene: [], flow: [] };
-  fetchInitialData();
+  fetchDailyLog();
 });
 
 // ===== HUFFMAN COMPRESSION =====
-// Full Huffman implementation in JavaScript
-
 class HuffmanNode {
   constructor(char, freq, left = null, right = null) {
     this.char = char;
@@ -453,13 +556,11 @@ class HuffmanNode {
 }
 
 function buildHuffmanTree(text) {
-  // 1. Count frequencies
   const freq = {};
   for (const ch of text) {
     freq[ch] = (freq[ch] || 0) + 1;
   }
 
-  // 2. Build priority queue (min-heap via array sort)
   let nodes = Object.entries(freq).map(([ch, f]) => new HuffmanNode(ch, f));
   
   if (nodes.length === 0) return { root: null, codes: {}, freq: {} };
@@ -476,7 +577,6 @@ function buildHuffmanTree(text) {
     nodes.push(parent);
   }
 
-  // 3. Build codes
   const codes = {};
   function traverse(node, code) {
     if (!node) return;
@@ -495,13 +595,11 @@ function buildHuffmanTree(text) {
 function huffmanEncode(text) {
   const { codes, freq } = buildHuffmanTree(text);
   
-  // Encode text to binary string
   let binaryStr = "";
   for (const ch of text) {
     binaryStr += codes[ch];
   }
 
-  // Pack binary string into Uint8Array
   const paddingBits = (8 - (binaryStr.length % 8)) % 8;
   binaryStr += "0".repeat(paddingBits);
 
@@ -510,11 +608,9 @@ function huffmanEncode(text) {
     bytes[i] = parseInt(binaryStr.substring(i * 8, (i + 1) * 8), 2);
   }
 
-  // Build header: JSON with codes table + padding info
   const header = JSON.stringify({ codes, padding: paddingBits });
   const headerBytes = new TextEncoder().encode(header);
 
-  // Format: [4 bytes header length][header][compressed data]
   const headerLen = new Uint32Array([headerBytes.length]);
   const headerLenBytes = new Uint8Array(headerLen.buffer);
 
@@ -537,19 +633,16 @@ function huffmanEncode(text) {
 $("btn-export-huffman").addEventListener("click", () => {
   if (state.metricsHistory.length === 0) return alert("No hay datos para exportar.");
 
-  // Serialize metrics to JSON string
   const jsonText = JSON.stringify(state.metricsHistory);
   const result = huffmanEncode(jsonText);
 
   state.lastHuffmanBlob = new Blob([result.compressed], { type: "application/octet-stream" });
 
-  // Populate modal
   $("huff-original").textContent   = formatBytes(result.originalSize);
   $("huff-compressed").textContent = formatBytes(result.compressedSize);
   $("huff-ratio").textContent      = `${result.ratio}%`;
   $("huff-symbols").textContent    = result.symbolCount;
 
-  // Show top 10 codes
   const sortedCodes = Object.entries(result.freq)
     .sort((a, b) => b[1] - a[1])
     .slice(0, 10);
@@ -564,7 +657,6 @@ $("btn-export-huffman").addEventListener("click", () => {
       </div>`;
   }).join("");
 
-  // Show modal
   $("huffman-modal").classList.remove("hidden");
 });
 
@@ -584,7 +676,7 @@ $("btn-download-hfm").addEventListener("click", () => {
   downloadBlob(state.lastHuffmanBlob, `aforo_data_${ts}.hfm`);
 });
 
-// ===== UTILITY FUNCTIONS =====
+// ===== UTILITIES =====
 function formatBytes(bytes) {
   if (bytes < 1024) return bytes + " B";
   if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
@@ -609,30 +701,13 @@ function downloadBlob(blob, filename) {
 
 // ===== INIT =====
 (async function init() {
-  await fetchInitialData();
-  subscribeToRealtime();
-
-  // Polling fallback every 5s
-  setInterval(async () => {
-    try {
-      const { data, error } = await sb
-        .from("metrics")
-        .select("*")
-        .order("ts", { ascending: false })
-        .limit(1);
-
-      if (error || !data || data.length === 0) return;
-
-      const latest = data[0];
-      const lastKnown = state.metricsHistory[state.metricsHistory.length - 1];
-
-      if (!lastKnown || latest.id !== lastKnown.id) {
-        state.metricsHistory.push(latest);
-        if (state.metricsHistory.length > 200) state.metricsHistory.shift();
-        updateDashboard(latest);
-        addTableRow(latest);
-        rebuildMainChart();
-      }
-    } catch (_) { /* silent fallback */ }
-  }, 5000);
+  // Cargar historial inicial diario
+  await fetchDailyLog();
+  
+  // Encender el polling en tiempo real cada 2 segundos
+  pollLiveMetrics();
+  setInterval(pollLiveMetrics, 2000);
+  
+  // Actualizar el historial jsonl de fondo cada 15 segundos
+  setInterval(fetchDailyLog, 15000);
 })();
