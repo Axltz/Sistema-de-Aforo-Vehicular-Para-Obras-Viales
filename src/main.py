@@ -7,12 +7,40 @@
 
 import cv2
 import numpy as np
+from supabase import create_client
+from src.config import SUPABASE_URL, SUPABASE_ANON_KEY
 
 from src.detection.detection import frame_detection
 from src.pipeline.pipeline import process_frame
 from src.analytics.processing import create_system_state, count_vehicles, calibrate_system
 from src.storage.json_writer import save_metrics_to_json
 from src.visualization.overlay import draw_overlay
+
+# Inicializar cliente Supabase
+supabase_client = create_client(SUPABASE_URL, SUPABASE_ANON_KEY)
+
+
+def insert_metric(total_count: int, extra_data: dict):
+    """Inserta una fila en la tabla Supabase `metrics`."""
+    # Limpiar datos no serializables (sets → listas)
+    clean_data = {}
+    for k, v in extra_data.items():
+        if isinstance(v, set):
+            clean_data[k] = list(v)
+        elif k == "prev_ids_pos":
+            continue  # No necesitamos esto en la BD
+        else:
+            clean_data[k] = v
+    payload = {
+        "total_count": total_count,
+        "data": clean_data
+    }
+    try:
+        supabase_client.table("metrics").insert(payload).execute()
+        print("✅ Métricas subidas a Supabase")
+    except Exception as e:
+        print(f"⚠️ Error al subir métricas: {e}")
+
 
 # 1. CARGAR EL VIDEO
 video_path = "data/videos/trafico3.mp4"
@@ -106,6 +134,11 @@ while cap.isOpened():
         # REGISTRO HISTÓRICO EN SEGUNDO PLANO
         if frame_count % 150 == 0:
             save_metrics_to_json(result["metrics"])
+            # Subir métricas a Supabase
+            insert_metric(
+                total_count=result["metrics"].get("total_count", 0),
+                extra_data=result["metrics"]
+            )
 
     # PASO F: PINTAR LA PANTALLA
     # Todo está en coordenadas locales del recorte, no requiere transformaciones
