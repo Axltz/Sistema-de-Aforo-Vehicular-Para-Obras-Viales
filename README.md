@@ -1,115 +1,108 @@
-# SISTEMA INTELIGENTE DE AFORO VEHICULAR PARA OBRAS VIALES
+# Sistema Inteligente de Aforo Vehicular para Obras Viales
 
-Sistema de visión artificial optimizado y dashboard interactivo en tiempo real diseñado para el conteo, monitoreo y análisis del flujo vehicular en zonas de obra vial.
+Diseño e implementación de un sistema de visión artificial para el conteo y monitoreo vehicular en zonas de obra vial. Proyecto desarrollado para la materia de Análisis de Algoritmos.
 
-Este software reemplaza los conteos manuales tradicionales por un sistema de monitoreo inteligente local 100% offline, recolectando datos de tráfico precisos de forma segura y económica.
-
----
-
-## 🚀 Arquitectura Local y Offline
-
-El sistema funciona con un diseño híbrido local que no requiere conexiones de red externas ni bases de datos en la nube (cero APIs, cero dependencias online):
-
-```
-+------------------------------------+          +------------------------------------+
-|  Motor Python (OpenCV + YOLO)      |          |  Dashboard Frontend (HTML5/JS/CSS)  |
-|  - Procesa video o webcam          |          |  - Corre localmente (http.server)  |
-|  - Frame skipping (optimiza CPU)   |          |  - Polling dinámico cada 2 segs    |
-|  - Conteo y analítica adaptativa   |          |  - Gráfico neón de Horas Pico      |
-+------------------------------------+          +------------------------------------+
-                  |                                               |
-                  v (Escribe periódicamente)                      v (Lee de forma offline)
-      data/metrics_live.json    ----------------------------------+
-      data/logs/metrics_HOY.jsonl --------------------------------+
-```
+Este proyecto surge como solución a la necesidad de automatizar la recolección de datos de tráfico en zonas de construcción, tareas que tradicionalmente se realizan de manera manual por personal en campo expuesto a riesgos.
 
 ---
 
-## 🛠️ Tecnologías Empleadas
+## Objetivos del Proyecto
 
-* **Backend (Procesamiento):** Python 3.x, OpenCV (manejo de video/cámara), Ultralytics YOLOv8/YOLOv11 Nano (detección y tracking neuronal ligero).
-* **Frontend (Visualización):** HTML5 Semántico, CSS3 con estética de Centro de Control (Neón/Glassmorphism/Partículas), Chart.js (Gráfico lineal de flujo en tiempo real + Gráfico de barras de Horas Pico).
-* **Compresión:** Implementación de un algoritmo de **Compresión Huffman** nativo en el navegador para empaquetar, comprimir y descargar los datos históricos acumulados sin consumir ancho de banda.
+* **Detectar vehículos:** Identificar autos, camiones, motocicletas y bicicletas mediante análisis de video.
+* **Contabilizar el flujo vehicular:** Registrar de forma automática el volumen de vehículos que cruzan por una línea adaptativa.
+* **Analizar comportamiento:** Determinar la velocidad promedio de marcha, el nivel de congestión e identificar agrupaciones de riesgo.
+* **Procesar localmente:** Operar de manera 100% local sin requerir de servicios en la nube o conexión a internet una vez inicializado el modelo de detección.
 
 ---
 
-## 📦 Requisitos e Instalación
+## Tecnologías Utilizadas
 
-1. **Clonar o descargar el repositorio** en tu computadora.
-2. **Crear y activar un entorno virtual de Python** (Recomendado):
+* **Backend:** Python 3.x, OpenCV (procesamiento de imágenes y video), Ultralytics YOLO (modelo de detección y rastreo de objetos).
+* **Frontend:** HTML5, CSS3, JavaScript (Chart.js para las gráficas de flujo en tiempo real y distribución de horas pico).
+* **Compresión:** Algoritmo de Huffman nativo implementado en JavaScript para exportación de datos.
+
+---
+
+## Arquitectura de Datos Local
+
+El sistema utiliza una arquitectura desacoplada basada en archivos para permitir su funcionamiento sin conexión a internet:
+
+* El script de Python procesa el video, calcula las métricas y sobrescribe el archivo `data/metrics_live.json` cada 10 frames para mantener los datos en tiempo real.
+* Paralelamente, el script añade un registro histórico cada 150 frames al archivo diario en formato JSONL (`data/logs/metrics_YYYY-MM-DD.jsonl`).
+* El frontend de JavaScript realiza consultas periódicas (polling) cada 2 segundos a estos archivos locales a través de peticiones HTTP locales.
+
+---
+
+## Instrucciones de Instalación y Uso
+
+### Requisitos Previos
+
+1. Instalar Python 3.x en el equipo.
+2. Crear y activar un entorno virtual de Python:
    ```bash
    python -m venv venv
    # En Windows:
    venv\Scripts\activate
    ```
-3. **Instalar las dependencias locales:**
+3. Instalar las dependencias necesarias:
    ```bash
    pip install -r requirements.txt
    ```
-   *(Nota: Se utiliza la librería oficial de `ultralytics` para YOLO y `opencv-python` para la interfaz de cámara y video).*
 
----
+### Ejecución del Sistema
 
-## 🚦 Instrucciones de Uso (Paso a Paso)
+El sistema requiere la ejecución de dos procesos de forma simultánea. Abre dos terminales diferentes en la carpeta raíz del proyecto y ejecuta los siguientes comandos:
 
-Para arrancar el sistema en demo o tiempo real de forma local, se ejecutan únicamente **dos comandos** en terminales separadas:
+#### Proceso 1: Ejecutar el procesamiento de video en Python
 
-### Terminal 1: Iniciar el Motor de Inteligencia (Python)
-
-Puedes ejecutar el motor de dos formas:
-
-* **Opción A (Video de Prueba precargado):**
+* **Ejecutar con el video de prueba predeterminado:**
   ```bash
   python src/main.py
   ```
-* **Opción B (Cámara Web o Stream RTSP en tiempo real):**
+* **Ejecutar utilizando la cámara web en tiempo real:**
   ```bash
   python src/main.py --webcam
   ```
-  *(Opcional: Si deseas usar otro video en particular, usa `python src/main.py --video data/videos/nombre_video.mp4`)*
+* **Ejecutar especificando otro archivo de video:**
+  ```bash
+  python src/main.py --video ruta/de/tu_video.mp4
+  ```
 
-* **Teclas útiles en la ventana de video:**
-  * Presiona `Q` para apagar el sistema correctamente.
-  * Presiona `E` para forzar la exportación de un reporte consolidado instantáneo a `data/json/traffic_data.json`.
+*(Nota: En la ventana del video puedes presionar la tecla 'Q' para detener la ejecución, o la tecla 'E' para exportar un resumen manual).*
 
----
+#### Proceso 2: Iniciar el servidor local para el Dashboard
 
-### Terminal 2: Iniciar el Servidor Web del Dashboard
-
-Ejecuta el servidor web estático integrado en Python desde la raíz del proyecto para que el navegador pueda acceder de forma segura a los archivos locales de datos:
-
+En la segunda terminal, inicia el servidor estático web de Python:
 ```bash
 python -m http.server 8080
 ```
 
----
+### Visualizar el Dashboard
 
-### Abrir el Dashboard en el Navegador
+Abre tu navegador de preferencia e ingresa a la siguiente dirección:
 
-Una vez encendidos ambos comandos, abre tu navegador web preferido e ingresa a la siguiente dirección:
+[http://localhost:8080/frontend/src/index.html](http://localhost:8080/frontend/src/index.html)
 
-👉 **[http://localhost:8080/frontend/src/index.html](http://localhost:8080/frontend/src/index.html)**
-
-El dashboard se conectará automáticamente con el motor local. Podrás ver en tiempo real:
-1. **Aforo Total acumulado** y **Vehículos en Escena**.
-2. **Velocidad de marcha** y **Fluidez de avance** adaptativa.
-3. **Gráfico interactivo de Horas Pico** (barras con colores neón agrupadas por hora) calculado automáticamente a partir del historial del día.
-4. **Exportar JSON y Huffman (.hfm):** Descargar copias de seguridad de las estadísticas directamente en tu computadora 100% offline.
+El frontend mostrará automáticamente las métricas de conteo, estado del tráfico, agrupaciones y el gráfico de barras correspondiente a las horas pico del día actual.
 
 ---
 
-## 📁 Estructura del Almacenamiento Local
+## Estructura de Archivos del Proyecto
 
-* `data/metrics_live.json`: Contiene las métricas del frame actual del sistema (se sobrescribe cada 10 frames para mantener un uso de disco casi nulo).
-* `data/logs/metrics_YYYY-MM-DD.jsonl`: Archivo de log diario donde se van acumulando las líneas de registros (JSONL) de forma cronológica cada 150 frames (~5 segundos) para construir la analítica y horas pico del día.
-* `data/videos/trafico3.mp4`: Video muestra utilizado para calibración y pruebas en laboratorio.
+* `src/main.py`: Punto de entrada que gestiona la captura y el flujo de detección.
+* `src/config.py`: Definición de rutas del sistema y parámetros de optimización.
+* `src/storage/json_writer.py`: Lógica para escribir el JSON en vivo y el historial diario en formato JSONL.
+* `frontend/src/index.html`: Estructura del panel de visualización.
+* `frontend/src/app.js`: Script de actualización del Dashboard, manejo de gráficas y compresión Huffman.
+* `data/`: Carpeta que almacena los videos de prueba y los registros JSON/JSONL autogenerados.
 
 ---
 
-## 👥 Equipo de Desarrollo
+## Equipo de Desarrollo
 
-* **Luna Gallegos Nayeli Ximena**
-* **Martínez Martínez Axel Guillermo**
-* **Mijares Ahuatzi Juan Carlos**
+* Luna Gallegos Nayeli Ximena
+* Martínez Martínez Axel Guillermo
+* Mijares Ahuatzi Juan Carlos
 
-*Proyecto desarrollado para la materia de Análisis de Algoritmos (5to Semestre) — Visualización de alto impacto y procesamiento optimizado en el borde.*
+**Universidad - 5to Semestre**  
+Materia: *Análisis de Algoritmos*
