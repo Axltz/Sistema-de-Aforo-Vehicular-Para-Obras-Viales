@@ -111,7 +111,7 @@ with st.sidebar:
     
     st.markdown("---")
     st.markdown("**Información del Sistema:**")
-    st.info("Modelo: YOLOv8\n\nResolución: 720p\n\nModo: Procesamiento en Vivo Optimizado")
+    st.info("Modelo: YOLOv26\n\nResolución: 720p\n\nModo: Procesamiento en Vivo Optimizado")
 
 # --- ÁREA PRINCIPAL ---
 st.title("🚦 Sistema Integral de Aforo Vehicular")
