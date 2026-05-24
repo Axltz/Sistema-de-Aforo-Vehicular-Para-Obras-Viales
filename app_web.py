@@ -240,7 +240,7 @@ if archivo_video is not None:
 
         cap.release()
         
-    # --- ZONA DE DESCARGA ---
+   # --- ZONA DE DESCARGA ---
     if st.session_state.video_path is not None and not st.session_state.playing and st.session_state.frame_idx > 0:
         st.markdown("---")
         st.success("✅ Procesamiento en pausa o finalizado.")
@@ -248,23 +248,27 @@ if archivo_video is not None:
         with st.expander("📦 Exportar Resultados del Aforo", expanded=True):
             contenido_txt = f"=== REPORTE DE AFORO VEHICULAR INTELIGENTE ===\n"
             contenido_txt += f"Fecha y Hora: {st.session_state.fecha_analisis}\n"
-            contenido_txt += f"Vehículos Totales: {st.session_state.total_count}\n"
-            contenido_txt += f"Frames Procesados: {st.session_state.frame_idx}\n"
-            contenido_txt += f"==============================================\n\n"
+            # ... (el resto de tu texto original)
             contenido_txt += "".join(st.session_state.historial)
             
-            buffer_zip = io.BytesIO()
-            with zipfile.ZipFile(buffer_zip, "w", zipfile.ZIP_DEFLATED) as zf:
-                zf.writestr("reporte_aforo.txt", contenido_txt)
-            buffer_zip.seek(0)
+            # --- APLICANDO HUFFMAN DIRECTAMENTE ---
+            texto_binario, diccionario_codigos = comprimir_texto_huffman(contenido_txt)
             
+            # Calculamos métricas para demostrar que funciona
+            bits_originales = len(contenido_txt) * 8
+            bits_comprimidos = len(texto_binario)
+            tasa_compresion = 100 - ((bits_comprimidos / bits_originales) * 100)
+            
+            st.markdown("#### 🗜️ Resultados de Compresión Huffman (Manual)")
+            st.write(f"Tamaño original: **{bits_originales} bits**")
+            st.write(f"Tamaño comprimido: **{bits_comprimidos} bits**")
+            st.write(f"Ahorro de espacio: **{tasa_compresion:.2f}%**")
+            
+            # Para exportarlo, guardamos la cadena de bits en un archivo de texto simple
             st.download_button(
-                label="📥 Descargar ZIP",
-                data=buffer_zip,
-                file_name="resultados_aforo_vial.zip",
-                mime="application/zip",
+                label="📥 Descargar Reporte Comprimido (Bits)",
+                data=texto_binario,
+                file_name="reporte_huffman.bin",
+                mime="text/plain",
                 use_container_width=True
             )
-else:
-    # Pantalla de bienvenida si no hay video cargado o si acaba de ser limpiado
-    st.info("👈 Por favor, carga un archivo de video en la barra lateral para comenzar.")

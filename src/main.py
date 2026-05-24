@@ -163,10 +163,10 @@ while cap.isOpened():
     if key == ord('q'):
         break  # Apagar sistema
     elif key == ord('e') or key == ord('E'):
-        # Exportación manual de un reporte JSON bonito al presionar 'E'
+        # Exportación manual de un reporte comprimido con Huffman al presionar 'E'
         if result is not None:
-            export_summary_json(result["metrics"])
-            print("💾 ¡Resumen consolidado exportado a data/json/traffic_data.json!")
+            from src.analytics.processing import export_summary_json_huffman
+            export_summary_json_huffman(result["metrics"])
 
 cap.release()
 cv2.destroyAllWindows()

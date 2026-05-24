@@ -18,8 +18,6 @@ def create_system_state():
         "line": {"start": (0, 0), "end": (0, 0)} 
     }
 
-
-
 def calibrate_system(vehiculos_detectados, dimensiones_frame, estado):
     estado["calibration_frames"] += 1
     alto, ancho = dimensiones_frame[:2]
@@ -51,15 +49,13 @@ def calibrate_system(vehiculos_detectados, dimensiones_frame, estado):
             estado["flow_direction"] = 1 if dy_prom > 0 else -1
             
             if estado["flow_direction"] == -1: # Subiendo
-                # Recortamos ajustado arriba (donde salen) y dejamos margen abajo (de donde vienen)
                 margen_top = 20
                 margen_bottom = 150
                 cy = min_y + 0.2 * (max_y - min_y) 
             else: # Bajando
-                # Recortamos ajustado abajo (donde salen) y dejamos margen arriba (de donde vienen)
                 margen_top = 150
                 margen_bottom = 20
-                cy = min_y + 0.8 * (max_y - min_y) # 80% de la trayectoria (cerca de la base de salida, sin tocar abajo)
+                cy = min_y + 0.8 * (max_y - min_y) 
                 
             estado["active_roi"] = {
                 "x1": int(max(0, min_x - 150)), "y1": int(max(0, min_y - margen_top)),
@@ -75,17 +71,16 @@ def calibrate_system(vehiculos_detectados, dimensiones_frame, estado):
             if estado["flow_direction"] == 1: # Derecha
                 margen_left = 150
                 margen_right = 20
-                cx = min_x + 0.8 * (max_x - min_x) # 80% de la trayectoria (cerca de la salida a la derecha)
+                cx = min_x + 0.8 * (max_x - min_x) 
             else: # Izquierda
                 margen_left = 20
                 margen_right = 150
-                cx = min_x + 0.2 * (max_x - min_x) # 20% de la trayectoria (cerca de la salida a la izquierda)
+                cx = min_x + 0.2 * (max_x - min_x) 
                 
             estado["active_roi"] = {
                 "x1": int(max(0, min_x - margen_left)), "y1": int(max(0, min_y - 150)),
                 "x2": int(min(ancho, max_x + margen_right)), "y2": int(min(alto, max_y + 150))
             }
-            # La línea abarca del extremo superior al extremo inferior del recorte
             line_y1 = estado["active_roi"]["y1"]
             line_y2 = estado["active_roi"]["y2"]
             estado["line"] = {"start": (int(cx), line_y1), "end": (int(cx), line_y2)}
@@ -106,8 +101,8 @@ def count_vehicles(detections, state):
     
     for d in detections:
         vid, curr = d["id"], np.array(d["center"])
-        # Obtener posición anterior antes de que fuera actualizada
         prev = np.array(state["ids_history"].get(vid, curr))        
+        
         # Filtrar por dirección
         if state["orientation"] == "vertical":
             if (curr[1] - prev[1]) * state["flow_direction"] < 0: continue
@@ -123,18 +118,15 @@ def count_vehicles(detections, state):
                 state["counted_ids"].add(vid)
                 state["crossing_timestamps"].append(time.time())
 
-                
     # Actualizar posiciones para el siguiente frame
     for d in detections:
         vid = d["id"]
         centro = d["center"]
         state["ids_history"][vid] = centro
         
-        # MANTENER VIVO EL HISTORIAL DE TRAYECTORIAS
         if vid not in state["trajectories"]:
             state["trajectories"][vid] = []
         state["trajectories"][vid].append(centro)
-        # Limitar la memoria a los últimos 30 frames
         if len(state["trajectories"][vid]) > 30:
             state["trajectories"][vid].pop(0)
 
@@ -143,3 +135,58 @@ def count_vehicles(detections, state):
     state["crossing_timestamps"] = [t for t in state.get("crossing_timestamps", []) if current_time - t <= 60]
 
     return state["total_count"], line
+
+def export_summary_json_huffman(metrics):
+    # IMPORTACIÓN LOCAL (Evita que el programa se rompa por dependencias circulares)
+    from src.analytics.huffman import comprimir_texto_huffman
+    from datetime import datetime
+    import json
+    import os
+    from src.config import LOGS_DIR
+
+    export_dir = LOGS_DIR.parent / "json"
+    os.makedirs(export_dir, exist_ok=True)
+        
+    export_file = export_dir / "traffic_data_compressed.bin"
+    dict_file = export_dir / "traffic_data_dict.json"
+    
+    resumen = {
+        "reporte_generado": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "aforo_total_acumulado": metrics.get("total_count", 0),
+        "tasa_flujo_actual_por_min": metrics.get("flujo_por_minuto", 0),
+        "vehiculos_en_escena": metrics.get("total_vehicles", 0),
+        "estado_general_via": metrics.get("fluidez_avance", "N/A"),
+        "riesgo_de_embotellamiento": metrics.get("alerta_embotellamiento", False)
+    }
+    
+    json_str = json.dumps(resumen, ensure_ascii=False)
+    texto_binario, diccionario_codigos = comprimir_texto_huffman(json_str)
+    
+    if not texto_binario:
+        return
+
+    b = bytearray()
+    for i in range(0, len(texto_binario), 8):
+        byte_chunk = texto_binario[i:i+8].ljust(8, '0')
+        b.append(int(byte_chunk, 2))
+    
+    try:
+        with open(export_file, "wb") as f:
+            f.write(bytes(b))
+        with open(dict_file, "w", encoding="utf-8") as f:
+            json.dump(diccionario_codigos, f, ensure_ascii=False, indent=2)
+            
+        bytes_originales = len(json_str.encode('utf-8'))
+        bytes_comprimidos = len(b)
+        tasa_compresion = 100 - ((bytes_comprimidos / bytes_originales) * 100)
+        
+        print("\n" + "="*55)
+        print(" 🗜️   REPORTE COMPRIMIDO CON HUFFMAN (LOCAL) ")
+        print("="*55)
+        print(f" 📂 Archivo Binario:   {export_file.name}")
+        print(f" 🔑 Archivo Clave:     {dict_file.name}")
+        print(f" 📈 Ahorro de espacio: {tasa_compresion:.2f}%")
+        print("="*55 + "\n")
+        
+    except Exception as e:
+        print(f"⚠️ Error: {e}")

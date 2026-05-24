@@ -1,0 +1,14 @@
+{
+  "id": 1779591953807,
+  "ts": "2026-05-23T21:05:53.807068",
+  "total_count": 7,
+  "data": {
+    "total_vehicles": 6,
+    "flujo_por_minuto": 34.4,
+    "interaccion_pct": 70.0,
+    "fluidez_avance": "TRAFICO DENSO PERO FLUIDO",
+    "velocidad_marcha": "FLUJO ALTO",
+    "alerta_embotellamiento": false,
+    "cluster_metrics": []
+  }
+}
