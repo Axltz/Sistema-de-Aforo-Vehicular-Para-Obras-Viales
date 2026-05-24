@@ -1,0 +1,3180 @@
+{
+    "frame_0": {
+        "vehiculos": [
+            {
+                "tipo": "car",
+                "x": 600,
+                "y": 250,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 411,
+                "y": 298,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 459,
+                "y": 428,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 335,
+                "y": 220,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 152,
+                "y": 145,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "bus",
+                "x": 446,
+                "y": 167,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 301,
+                "y": 188,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "bus",
+                "x": 88,
+                "y": 128,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "truck",
+                "x": 257,
+                "y": 161,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 257,
+                "y": 161,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "truck",
+                "x": 446,
+                "y": 167,
+                "zona": "zona_1"
+            }
+        ],
+        "total_vehiculos": 11,
+        "conteo_zonas": {
+            "zona_1": 8,
+            "zona_2": 0,
+            "zona_3": 3
+        },
+        "densidad": "media",
+        "clusters": 2,
+        "estado": "congestionado"
+    },
+    "frame_1": {
+        "vehiculos": [
+            {
+                "tipo": "car",
+                "x": 600,
+                "y": 250,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 411,
+                "y": 298,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 459,
+                "y": 428,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 335,
+                "y": 220,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 152,
+                "y": 145,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "bus",
+                "x": 446,
+                "y": 167,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 301,
+                "y": 188,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "bus",
+                "x": 88,
+                "y": 128,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "truck",
+                "x": 257,
+                "y": 161,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 257,
+                "y": 161,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "truck",
+                "x": 446,
+                "y": 167,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 45,
+                "y": 138,
+                "zona": "zona_1"
+            }
+        ],
+        "total_vehiculos": 12,
+        "conteo_zonas": {
+            "zona_1": 9,
+            "zona_2": 0,
+            "zona_3": 3
+        },
+        "densidad": "media",
+        "clusters": 2,
+        "estado": "congestionado"
+    },
+    "frame_2": {
+        "vehiculos": [
+            {
+                "tipo": "car",
+                "x": 601,
+                "y": 251,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 412,
+                "y": 299,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 459,
+                "y": 429,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 335,
+                "y": 220,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 153,
+                "y": 145,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "bus",
+                "x": 447,
+                "y": 167,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "bus",
+                "x": 88,
+                "y": 128,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 301,
+                "y": 190,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 258,
+                "y": 161,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "truck",
+                "x": 258,
+                "y": 162,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 34,
+                "y": 141,
+                "zona": "zona_1"
+            }
+        ],
+        "total_vehiculos": 11,
+        "conteo_zonas": {
+            "zona_1": 8,
+            "zona_2": 0,
+            "zona_3": 3
+        },
+        "densidad": "media",
+        "clusters": 2,
+        "estado": "congestionado"
+    },
+    "frame_3": {
+        "vehiculos": [
+            {
+                "tipo": "car",
+                "x": 604,
+                "y": 253,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 461,
+                "y": 431,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 415,
+                "y": 303,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 338,
+                "y": 221,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 153,
+                "y": 144,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "bus",
+                "x": 449,
+                "y": 167,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 303,
+                "y": 191,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 259,
+                "y": 162,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "bus",
+                "x": 88,
+                "y": 128,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 45,
+                "y": 137,
+                "zona": "zona_1"
+            }
+        ],
+        "total_vehiculos": 10,
+        "conteo_zonas": {
+            "zona_1": 7,
+            "zona_2": 0,
+            "zona_3": 3
+        },
+        "densidad": "media",
+        "clusters": 2,
+        "estado": "congestionado"
+    },
+    "frame_4": {
+        "vehiculos": [
+            {
+                "tipo": "car",
+                "x": 607,
+                "y": 256,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 461,
+                "y": 434,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 418,
+                "y": 306,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 340,
+                "y": 223,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 154,
+                "y": 144,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "bus",
+                "x": 451,
+                "y": 169,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 305,
+                "y": 192,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 261,
+                "y": 162,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "bus",
+                "x": 88,
+                "y": 129,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 45,
+                "y": 138,
+                "zona": "zona_1"
+            }
+        ],
+        "total_vehiculos": 10,
+        "conteo_zonas": {
+            "zona_1": 7,
+            "zona_2": 0,
+            "zona_3": 3
+        },
+        "densidad": "media",
+        "clusters": 2,
+        "estado": "congestionado"
+    },
+    "frame_5": {
+        "vehiculos": [
+            {
+                "tipo": "car",
+                "x": 462,
+                "y": 435,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 609,
+                "y": 259,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 419,
+                "y": 309,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 341,
+                "y": 224,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "bus",
+                "x": 452,
+                "y": 170,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 155,
+                "y": 143,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 304,
+                "y": 194,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 262,
+                "y": 163,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "bus",
+                "x": 88,
+                "y": 129,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 45,
+                "y": 138,
+                "zona": "zona_1"
+            }
+        ],
+        "total_vehiculos": 10,
+        "conteo_zonas": {
+            "zona_1": 7,
+            "zona_2": 0,
+            "zona_3": 3
+        },
+        "densidad": "media",
+        "clusters": 2,
+        "estado": "congestionado"
+    },
+    "frame_6": {
+        "vehiculos": [
+            {
+                "tipo": "car",
+                "x": 463,
+                "y": 438,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 344,
+                "y": 227,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 612,
+                "y": 261,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 420,
+                "y": 312,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 306,
+                "y": 194,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "bus",
+                "x": 454,
+                "y": 170,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 155,
+                "y": 143,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 264,
+                "y": 163,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "bus",
+                "x": 87,
+                "y": 127,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 44,
+                "y": 137,
+                "zona": "zona_1"
+            }
+        ],
+        "total_vehiculos": 10,
+        "conteo_zonas": {
+            "zona_1": 7,
+            "zona_2": 0,
+            "zona_3": 3
+        },
+        "densidad": "media",
+        "clusters": 2,
+        "estado": "congestionado"
+    },
+    "frame_7": {
+        "vehiculos": [
+            {
+                "tipo": "car",
+                "x": 614,
+                "y": 264,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 468,
+                "y": 440,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "bus",
+                "x": 456,
+                "y": 171,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 422,
+                "y": 316,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 346,
+                "y": 229,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 309,
+                "y": 197,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 156,
+                "y": 143,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "bus",
+                "x": 88,
+                "y": 129,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 264,
+                "y": 164,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 44,
+                "y": 140,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 35,
+                "y": 141,
+                "zona": "zona_1"
+            }
+        ],
+        "total_vehiculos": 11,
+        "conteo_zonas": {
+            "zona_1": 8,
+            "zona_2": 0,
+            "zona_3": 3
+        },
+        "densidad": "media",
+        "clusters": 2,
+        "estado": "congestionado"
+    },
+    "frame_8": {
+        "vehiculos": [
+            {
+                "tipo": "car",
+                "x": 617,
+                "y": 264,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 469,
+                "y": 441,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 424,
+                "y": 318,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 347,
+                "y": 230,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 156,
+                "y": 143,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "bus",
+                "x": 458,
+                "y": 171,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 310,
+                "y": 197,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "bus",
+                "x": 87,
+                "y": 128,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 264,
+                "y": 164,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 44,
+                "y": 138,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 35,
+                "y": 141,
+                "zona": "zona_1"
+            }
+        ],
+        "total_vehiculos": 11,
+        "conteo_zonas": {
+            "zona_1": 8,
+            "zona_2": 0,
+            "zona_3": 3
+        },
+        "densidad": "media",
+        "clusters": 2,
+        "estado": "congestionado"
+    },
+    "frame_9": {
+        "vehiculos": [
+            {
+                "tipo": "car",
+                "x": 620,
+                "y": 266,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 349,
+                "y": 233,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 429,
+                "y": 322,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "bus",
+                "x": 460,
+                "y": 172,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 466,
+                "y": 444,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 312,
+                "y": 197,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 157,
+                "y": 143,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 266,
+                "y": 165,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "bus",
+                "x": 87,
+                "y": 128,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 44,
+                "y": 137,
+                "zona": "zona_1"
+            }
+        ],
+        "total_vehiculos": 10,
+        "conteo_zonas": {
+            "zona_1": 7,
+            "zona_2": 0,
+            "zona_3": 3
+        },
+        "densidad": "media",
+        "clusters": 2,
+        "estado": "congestionado"
+    },
+    "frame_10": {
+        "vehiculos": [
+            {
+                "tipo": "car",
+                "x": 623,
+                "y": 269,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 431,
+                "y": 326,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 352,
+                "y": 234,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 468,
+                "y": 447,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 158,
+                "y": 143,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 268,
+                "y": 165,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 311,
+                "y": 201,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "bus",
+                "x": 87,
+                "y": 129,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 462,
+                "y": 173,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "truck",
+                "x": 461,
+                "y": 173,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "bus",
+                "x": 462,
+                "y": 173,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 45,
+                "y": 138,
+                "zona": "zona_1"
+            }
+        ],
+        "total_vehiculos": 12,
+        "conteo_zonas": {
+            "zona_1": 9,
+            "zona_2": 0,
+            "zona_3": 3
+        },
+        "densidad": "media",
+        "clusters": 2,
+        "estado": "congestionado"
+    },
+    "frame_11": {
+        "vehiculos": [
+            {
+                "tipo": "car",
+                "x": 625,
+                "y": 270,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 353,
+                "y": 235,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 433,
+                "y": 328,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 468,
+                "y": 448,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 159,
+                "y": 143,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 315,
+                "y": 202,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 269,
+                "y": 166,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 463,
+                "y": 174,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "bus",
+                "x": 87,
+                "y": 128,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "truck",
+                "x": 87,
+                "y": 130,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 45,
+                "y": 138,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 38,
+                "y": 141,
+                "zona": "zona_1"
+            }
+        ],
+        "total_vehiculos": 12,
+        "conteo_zonas": {
+            "zona_1": 9,
+            "zona_2": 0,
+            "zona_3": 3
+        },
+        "densidad": "media",
+        "clusters": 2,
+        "estado": "congestionado"
+    },
+    "frame_12": {
+        "vehiculos": [
+            {
+                "tipo": "car",
+                "x": 434,
+                "y": 331,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 355,
+                "y": 237,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 627,
+                "y": 272,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 160,
+                "y": 143,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 477,
+                "y": 451,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 270,
+                "y": 167,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 317,
+                "y": 203,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "bus",
+                "x": 87,
+                "y": 128,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "truck",
+                "x": 465,
+                "y": 175,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 218,
+                "y": 142,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "truck",
+                "x": 87,
+                "y": 130,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 45,
+                "y": 138,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 36,
+                "y": 141,
+                "zona": "zona_1"
+            }
+        ],
+        "total_vehiculos": 13,
+        "conteo_zonas": {
+            "zona_1": 10,
+            "zona_2": 0,
+            "zona_3": 3
+        },
+        "densidad": "media",
+        "clusters": 2,
+        "estado": "congestionado"
+    },
+    "frame_13": {
+        "vehiculos": [
+            {
+                "tipo": "car",
+                "x": 436,
+                "y": 335,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 631,
+                "y": 276,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 358,
+                "y": 240,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 161,
+                "y": 143,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 476,
+                "y": 454,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 319,
+                "y": 205,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 272,
+                "y": 169,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "bus",
+                "x": 87,
+                "y": 128,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "truck",
+                "x": 468,
+                "y": 176,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "truck",
+                "x": 87,
+                "y": 130,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 210,
+                "y": 151,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 45,
+                "y": 138,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 37,
+                "y": 141,
+                "zona": "zona_1"
+            }
+        ],
+        "total_vehiculos": 13,
+        "conteo_zonas": {
+            "zona_1": 9,
+            "zona_2": 0,
+            "zona_3": 4
+        },
+        "densidad": "media",
+        "clusters": 2,
+        "estado": "congestionado"
+    },
+    "frame_14": {
+        "vehiculos": [
+            {
+                "tipo": "car",
+                "x": 358,
+                "y": 241,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 436,
+                "y": 337,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 632,
+                "y": 277,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 161,
+                "y": 143,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 319,
+                "y": 206,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 272,
+                "y": 169,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 476,
+                "y": 456,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "bus",
+                "x": 87,
+                "y": 128,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "truck",
+                "x": 469,
+                "y": 176,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 45,
+                "y": 138,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "truck",
+                "x": 87,
+                "y": 130,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 211,
+                "y": 151,
+                "zona": "zona_1"
+            }
+        ],
+        "total_vehiculos": 12,
+        "conteo_zonas": {
+            "zona_1": 8,
+            "zona_2": 0,
+            "zona_3": 4
+        },
+        "densidad": "media",
+        "clusters": 2,
+        "estado": "congestionado"
+    },
+    "frame_15": {
+        "vehiculos": [
+            {
+                "tipo": "car",
+                "x": 439,
+                "y": 340,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 361,
+                "y": 244,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 161,
+                "y": 143,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 636,
+                "y": 280,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 274,
+                "y": 169,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 320,
+                "y": 208,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 474,
+                "y": 459,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "bus",
+                "x": 87,
+                "y": 128,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 44,
+                "y": 138,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "truck",
+                "x": 472,
+                "y": 177,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "bus",
+                "x": 472,
+                "y": 178,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 472,
+                "y": 177,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 211,
+                "y": 150,
+                "zona": "zona_1"
+            }
+        ],
+        "total_vehiculos": 13,
+        "conteo_zonas": {
+            "zona_1": 9,
+            "zona_2": 0,
+            "zona_3": 4
+        },
+        "densidad": "media",
+        "clusters": 2,
+        "estado": "congestionado"
+    },
+    "frame_16": {
+        "vehiculos": [
+            {
+                "tipo": "car",
+                "x": 441,
+                "y": 344,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 363,
+                "y": 246,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 639,
+                "y": 283,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 162,
+                "y": 143,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 277,
+                "y": 170,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 324,
+                "y": 207,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 475,
+                "y": 462,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 474,
+                "y": 178,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "truck",
+                "x": 87,
+                "y": 127,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "truck",
+                "x": 474,
+                "y": 178,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 44,
+                "y": 138,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "bus",
+                "x": 87,
+                "y": 128,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 213,
+                "y": 149,
+                "zona": "zona_1"
+            }
+        ],
+        "total_vehiculos": 13,
+        "conteo_zonas": {
+            "zona_1": 9,
+            "zona_2": 0,
+            "zona_3": 4
+        },
+        "densidad": "media",
+        "clusters": 2,
+        "estado": "congestionado"
+    },
+    "frame_17": {
+        "vehiculos": [
+            {
+                "tipo": "car",
+                "x": 443,
+                "y": 348,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 641,
+                "y": 284,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 364,
+                "y": 247,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 162,
+                "y": 142,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 326,
+                "y": 209,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 276,
+                "y": 171,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 475,
+                "y": 463,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "bus",
+                "x": 88,
+                "y": 129,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "truck",
+                "x": 475,
+                "y": 179,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 44,
+                "y": 138,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 36,
+                "y": 141,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 213,
+                "y": 149,
+                "zona": "zona_1"
+            }
+        ],
+        "total_vehiculos": 12,
+        "conteo_zonas": {
+            "zona_1": 8,
+            "zona_2": 0,
+            "zona_3": 4
+        },
+        "densidad": "media",
+        "clusters": 2,
+        "estado": "congestionado"
+    },
+    "frame_18": {
+        "vehiculos": [
+            {
+                "tipo": "car",
+                "x": 445,
+                "y": 352,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 644,
+                "y": 287,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 367,
+                "y": 250,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 163,
+                "y": 142,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 325,
+                "y": 211,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 278,
+                "y": 172,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "truck",
+                "x": 477,
+                "y": 179,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "bus",
+                "x": 88,
+                "y": 128,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 44,
+                "y": 138,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 215,
+                "y": 149,
+                "zona": "zona_1"
+            }
+        ],
+        "total_vehiculos": 10,
+        "conteo_zonas": {
+            "zona_1": 7,
+            "zona_2": 0,
+            "zona_3": 3
+        },
+        "densidad": "media",
+        "clusters": 2,
+        "estado": "congestionado"
+    },
+    "frame_19": {
+        "vehiculos": [
+            {
+                "tipo": "car",
+                "x": 647,
+                "y": 290,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 450,
+                "y": 356,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 370,
+                "y": 253,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 163,
+                "y": 142,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 329,
+                "y": 212,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 279,
+                "y": 173,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "truck",
+                "x": 88,
+                "y": 129,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "bus",
+                "x": 87,
+                "y": 129,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "bus",
+                "x": 480,
+                "y": 180,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 44,
+                "y": 138,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "truck",
+                "x": 480,
+                "y": 180,
+                "zona": "zona_1"
+            }
+        ],
+        "total_vehiculos": 11,
+        "conteo_zonas": {
+            "zona_1": 8,
+            "zona_2": 0,
+            "zona_3": 3
+        },
+        "densidad": "media",
+        "clusters": 2,
+        "estado": "congestionado"
+    },
+    "frame_20": {
+        "vehiculos": [
+            {
+                "tipo": "car",
+                "x": 649,
+                "y": 291,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 451,
+                "y": 358,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 370,
+                "y": 254,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 329,
+                "y": 212,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 278,
+                "y": 173,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 164,
+                "y": 142,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 481,
+                "y": 180,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "bus",
+                "x": 88,
+                "y": 129,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 44,
+                "y": 138,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "truck",
+                "x": 481,
+                "y": 180,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 216,
+                "y": 149,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 39,
+                "y": 140,
+                "zona": "zona_1"
+            }
+        ],
+        "total_vehiculos": 12,
+        "conteo_zonas": {
+            "zona_1": 9,
+            "zona_2": 0,
+            "zona_3": 3
+        },
+        "densidad": "media",
+        "clusters": 2,
+        "estado": "congestionado"
+    },
+    "frame_21": {
+        "vehiculos": [
+            {
+                "tipo": "car",
+                "x": 453,
+                "y": 362,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 652,
+                "y": 296,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 373,
+                "y": 257,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 330,
+                "y": 214,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 279,
+                "y": 174,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 164,
+                "y": 141,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 483,
+                "y": 181,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 217,
+                "y": 149,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "bus",
+                "x": 88,
+                "y": 130,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 44,
+                "y": 138,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "truck",
+                "x": 87,
+                "y": 132,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "truck",
+                "x": 483,
+                "y": 181,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "bus",
+                "x": 483,
+                "y": 181,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 39,
+                "y": 140,
+                "zona": "zona_1"
+            }
+        ],
+        "total_vehiculos": 14,
+        "conteo_zonas": {
+            "zona_1": 11,
+            "zona_2": 0,
+            "zona_3": 3
+        },
+        "densidad": "media",
+        "clusters": 2,
+        "estado": "congestionado"
+    },
+    "frame_22": {
+        "vehiculos": [
+            {
+                "tipo": "car",
+                "x": 455,
+                "y": 367,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 376,
+                "y": 259,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 656,
+                "y": 300,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 332,
+                "y": 216,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 280,
+                "y": 175,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 166,
+                "y": 141,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 486,
+                "y": 183,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "truck",
+                "x": 88,
+                "y": 130,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 219,
+                "y": 149,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 44,
+                "y": 138,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "bus",
+                "x": 87,
+                "y": 133,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 37,
+                "y": 140,
+                "zona": "zona_1"
+            }
+        ],
+        "total_vehiculos": 12,
+        "conteo_zonas": {
+            "zona_1": 9,
+            "zona_2": 0,
+            "zona_3": 3
+        },
+        "densidad": "media",
+        "clusters": 2,
+        "estado": "congestionado"
+    },
+    "frame_23": {
+        "vehiculos": [
+            {
+                "tipo": "car",
+                "x": 456,
+                "y": 369,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 659,
+                "y": 301,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 377,
+                "y": 260,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 333,
+                "y": 216,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 281,
+                "y": 175,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 166,
+                "y": 141,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 487,
+                "y": 183,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "truck",
+                "x": 88,
+                "y": 130,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 44,
+                "y": 138,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "truck",
+                "x": 487,
+                "y": 183,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 220,
+                "y": 149,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "bus",
+                "x": 87,
+                "y": 133,
+                "zona": "zona_1"
+            }
+        ],
+        "total_vehiculos": 12,
+        "conteo_zonas": {
+            "zona_1": 9,
+            "zona_2": 0,
+            "zona_3": 3
+        },
+        "densidad": "media",
+        "clusters": 2,
+        "estado": "congestionado"
+    },
+    "frame_24": {
+        "vehiculos": [
+            {
+                "tipo": "car",
+                "x": 458,
+                "y": 375,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 661,
+                "y": 303,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 380,
+                "y": 263,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 336,
+                "y": 217,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 166,
+                "y": 141,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 283,
+                "y": 176,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 220,
+                "y": 150,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "bus",
+                "x": 88,
+                "y": 130,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 44,
+                "y": 138,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "truck",
+                "x": 490,
+                "y": 184,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "bus",
+                "x": 489,
+                "y": 184,
+                "zona": "zona_1"
+            }
+        ],
+        "total_vehiculos": 11,
+        "conteo_zonas": {
+            "zona_1": 8,
+            "zona_2": 0,
+            "zona_3": 3
+        },
+        "densidad": "media",
+        "clusters": 2,
+        "estado": "congestionado"
+    },
+    "frame_25": {
+        "vehiculos": [
+            {
+                "tipo": "car",
+                "x": 664,
+                "y": 308,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 459,
+                "y": 379,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 382,
+                "y": 265,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 337,
+                "y": 221,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 284,
+                "y": 177,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 166,
+                "y": 140,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "bus",
+                "x": 492,
+                "y": 186,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "bus",
+                "x": 88,
+                "y": 130,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 220,
+                "y": 151,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 44,
+                "y": 138,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "truck",
+                "x": 492,
+                "y": 186,
+                "zona": "zona_1"
+            }
+        ],
+        "total_vehiculos": 11,
+        "conteo_zonas": {
+            "zona_1": 8,
+            "zona_2": 0,
+            "zona_3": 3
+        },
+        "densidad": "media",
+        "clusters": 2,
+        "estado": "congestionado"
+    },
+    "frame_26": {
+        "vehiculos": [
+            {
+                "tipo": "car",
+                "x": 665,
+                "y": 309,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 382,
+                "y": 266,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 460,
+                "y": 380,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 338,
+                "y": 221,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 284,
+                "y": 177,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 166,
+                "y": 140,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "bus",
+                "x": 88,
+                "y": 130,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 220,
+                "y": 149,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 44,
+                "y": 138,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "truck",
+                "x": 493,
+                "y": 186,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "bus",
+                "x": 493,
+                "y": 186,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 493,
+                "y": 187,
+                "zona": "zona_1"
+            }
+        ],
+        "total_vehiculos": 12,
+        "conteo_zonas": {
+            "zona_1": 9,
+            "zona_2": 0,
+            "zona_3": 3
+        },
+        "densidad": "media",
+        "clusters": 2,
+        "estado": "congestionado"
+    },
+    "frame_27": {
+        "vehiculos": [
+            {
+                "tipo": "car",
+                "x": 669,
+                "y": 312,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 385,
+                "y": 269,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 462,
+                "y": 386,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 340,
+                "y": 223,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 286,
+                "y": 178,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 167,
+                "y": 140,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "bus",
+                "x": 88,
+                "y": 129,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "truck",
+                "x": 495,
+                "y": 188,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 221,
+                "y": 147,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 44,
+                "y": 138,
+                "zona": "zona_1"
+            }
+        ],
+        "total_vehiculos": 10,
+        "conteo_zonas": {
+            "zona_1": 7,
+            "zona_2": 0,
+            "zona_3": 3
+        },
+        "densidad": "media",
+        "clusters": 2,
+        "estado": "congestionado"
+    },
+    "frame_28": {
+        "vehiculos": [
+            {
+                "tipo": "car",
+                "x": 465,
+                "y": 391,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 388,
+                "y": 271,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 342,
+                "y": 225,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 672,
+                "y": 317,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 288,
+                "y": 179,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 168,
+                "y": 141,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "truck",
+                "x": 499,
+                "y": 189,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "bus",
+                "x": 88,
+                "y": 130,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 222,
+                "y": 148,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 44,
+                "y": 138,
+                "zona": "zona_1"
+            }
+        ],
+        "total_vehiculos": 10,
+        "conteo_zonas": {
+            "zona_1": 7,
+            "zona_2": 0,
+            "zona_3": 3
+        },
+        "densidad": "media",
+        "clusters": 2,
+        "estado": "congestionado"
+    },
+    "frame_29": {
+        "vehiculos": [
+            {
+                "tipo": "car",
+                "x": 468,
+                "y": 394,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 389,
+                "y": 273,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 342,
+                "y": 225,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 673,
+                "y": 319,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 288,
+                "y": 179,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 169,
+                "y": 141,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "bus",
+                "x": 499,
+                "y": 190,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "bus",
+                "x": 88,
+                "y": 130,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 44,
+                "y": 138,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 222,
+                "y": 148,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "truck",
+                "x": 499,
+                "y": 190,
+                "zona": "zona_1"
+            }
+        ],
+        "total_vehiculos": 11,
+        "conteo_zonas": {
+            "zona_1": 8,
+            "zona_2": 0,
+            "zona_3": 3
+        },
+        "densidad": "media",
+        "clusters": 2,
+        "estado": "congestionado"
+    },
+    "frame_30": {
+        "vehiculos": [
+            {
+                "tipo": "car",
+                "x": 470,
+                "y": 398,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 391,
+                "y": 275,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 678,
+                "y": 322,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 344,
+                "y": 227,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 289,
+                "y": 181,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 169,
+                "y": 141,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "bus",
+                "x": 88,
+                "y": 129,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "bus",
+                "x": 501,
+                "y": 192,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 44,
+                "y": 137,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "truck",
+                "x": 501,
+                "y": 192,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 222,
+                "y": 147,
+                "zona": "zona_1"
+            }
+        ],
+        "total_vehiculos": 11,
+        "conteo_zonas": {
+            "zona_1": 8,
+            "zona_2": 0,
+            "zona_3": 3
+        },
+        "densidad": "media",
+        "clusters": 2,
+        "estado": "congestionado"
+    },
+    "frame_31": {
+        "vehiculos": [
+            {
+                "tipo": "car",
+                "x": 473,
+                "y": 403,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 393,
+                "y": 279,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 346,
+                "y": 231,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 683,
+                "y": 325,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 290,
+                "y": 182,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 170,
+                "y": 141,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "bus",
+                "x": 88,
+                "y": 131,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 503,
+                "y": 193,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 44,
+                "y": 138,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 224,
+                "y": 147,
+                "zona": "zona_1"
+            }
+        ],
+        "total_vehiculos": 10,
+        "conteo_zonas": {
+            "zona_1": 7,
+            "zona_2": 0,
+            "zona_3": 3
+        },
+        "densidad": "media",
+        "clusters": 2,
+        "estado": "congestionado"
+    },
+    "frame_32": {
+        "vehiculos": [
+            {
+                "tipo": "car",
+                "x": 474,
+                "y": 405,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 395,
+                "y": 280,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 685,
+                "y": 327,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 346,
+                "y": 231,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 292,
+                "y": 183,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 172,
+                "y": 141,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "bus",
+                "x": 88,
+                "y": 131,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "truck",
+                "x": 505,
+                "y": 194,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 44,
+                "y": 138,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 224,
+                "y": 147,
+                "zona": "zona_1"
+            }
+        ],
+        "total_vehiculos": 10,
+        "conteo_zonas": {
+            "zona_1": 7,
+            "zona_2": 0,
+            "zona_3": 3
+        },
+        "densidad": "media",
+        "clusters": 2,
+        "estado": "congestionado"
+    },
+    "frame_33": {
+        "vehiculos": [
+            {
+                "tipo": "car",
+                "x": 477,
+                "y": 410,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 689,
+                "y": 330,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 398,
+                "y": 283,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 348,
+                "y": 233,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 294,
+                "y": 184,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 172,
+                "y": 141,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 507,
+                "y": 196,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "truck",
+                "x": 87,
+                "y": 130,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 224,
+                "y": 147,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "bus",
+                "x": 87,
+                "y": 134,
+                "zona": "zona_1"
+            }
+        ],
+        "total_vehiculos": 10,
+        "conteo_zonas": {
+            "zona_1": 7,
+            "zona_2": 0,
+            "zona_3": 3
+        },
+        "densidad": "media",
+        "clusters": 2,
+        "estado": "congestionado"
+    },
+    "frame_34": {
+        "vehiculos": [
+            {
+                "tipo": "car",
+                "x": 691,
+                "y": 335,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 479,
+                "y": 414,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 400,
+                "y": 285,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 350,
+                "y": 234,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 295,
+                "y": 186,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 509,
+                "y": 198,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 173,
+                "y": 140,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "truck",
+                "x": 87,
+                "y": 129,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 226,
+                "y": 148,
+                "zona": "zona_1"
+            }
+        ],
+        "total_vehiculos": 9,
+        "conteo_zonas": {
+            "zona_1": 6,
+            "zona_2": 0,
+            "zona_3": 3
+        },
+        "densidad": "media",
+        "clusters": 2,
+        "estado": "congestionado"
+    },
+    "frame_35": {
+        "vehiculos": [
+            {
+                "tipo": "car",
+                "x": 692,
+                "y": 337,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 481,
+                "y": 415,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 401,
+                "y": 287,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 297,
+                "y": 186,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 351,
+                "y": 236,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 173,
+                "y": 140,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "truck",
+                "x": 87,
+                "y": 129,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 226,
+                "y": 148,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 510,
+                "y": 199,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "truck",
+                "x": 511,
+                "y": 199,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "bus",
+                "x": 87,
+                "y": 134,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "bus",
+                "x": 510,
+                "y": 199,
+                "zona": "zona_1"
+            }
+        ],
+        "total_vehiculos": 12,
+        "conteo_zonas": {
+            "zona_1": 9,
+            "zona_2": 0,
+            "zona_3": 3
+        },
+        "densidad": "media",
+        "clusters": 2,
+        "estado": "congestionado"
+    },
+    "frame_36": {
+        "vehiculos": [
+            {
+                "tipo": "car",
+                "x": 697,
+                "y": 340,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 484,
+                "y": 418,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 404,
+                "y": 290,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 300,
+                "y": 187,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 353,
+                "y": 238,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 514,
+                "y": 200,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 173,
+                "y": 141,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 227,
+                "y": 147,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "truck",
+                "x": 87,
+                "y": 130,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "bus",
+                "x": 87,
+                "y": 134,
+                "zona": "zona_1"
+            }
+        ],
+        "total_vehiculos": 10,
+        "conteo_zonas": {
+            "zona_1": 7,
+            "zona_2": 0,
+            "zona_3": 3
+        },
+        "densidad": "media",
+        "clusters": 2,
+        "estado": "congestionado"
+    },
+    "frame_37": {
+        "vehiculos": [
+            {
+                "tipo": "car",
+                "x": 700,
+                "y": 344,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 485,
+                "y": 420,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 407,
+                "y": 294,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 356,
+                "y": 241,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 300,
+                "y": 189,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 517,
+                "y": 201,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 174,
+                "y": 140,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "truck",
+                "x": 87,
+                "y": 130,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 228,
+                "y": 147,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "bus",
+                "x": 87,
+                "y": 135,
+                "zona": "zona_1"
+            }
+        ],
+        "total_vehiculos": 10,
+        "conteo_zonas": {
+            "zona_1": 6,
+            "zona_2": 0,
+            "zona_3": 4
+        },
+        "densidad": "media",
+        "clusters": 2,
+        "estado": "congestionado"
+    },
+    "frame_38": {
+        "vehiculos": [
+            {
+                "tipo": "car",
+                "x": 702,
+                "y": 347,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 408,
+                "y": 296,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 487,
+                "y": 422,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 300,
+                "y": 190,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 358,
+                "y": 243,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 518,
+                "y": 202,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 174,
+                "y": 140,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "truck",
+                "x": 87,
+                "y": 130,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "bus",
+                "x": 87,
+                "y": 135,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 229,
+                "y": 147,
+                "zona": "zona_1"
+            }
+        ],
+        "total_vehiculos": 10,
+        "conteo_zonas": {
+            "zona_1": 6,
+            "zona_2": 0,
+            "zona_3": 4
+        },
+        "densidad": "media",
+        "clusters": 2,
+        "estado": "congestionado"
+    },
+    "frame_39": {
+        "vehiculos": [
+            {
+                "tipo": "car",
+                "x": 706,
+                "y": 351,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 411,
+                "y": 298,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 489,
+                "y": 424,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 301,
+                "y": 191,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 359,
+                "y": 245,
+                "zona": "zona_3"
+            },
+            {
+                "tipo": "car",
+                "x": 520,
+                "y": 203,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "car",
+                "x": 175,
+                "y": 140,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "truck",
+                "x": 87,
+                "y": 130,
+                "zona": "zona_1"
+            },
+            {
+                "tipo": "bus",
+                "x": 87,
+                "y": 135,
+                "zona": "zona_1"
+            }
+        ],
+        "total_vehiculos": 9,
+        "conteo_zonas": {
+            "zona_1": 5,
+            "zona_2": 0,
+            "zona_3": 4
+        },
+        "densidad": "media",
+        "clusters": 2,
+        "estado": "congestionado"
+    }
+}
