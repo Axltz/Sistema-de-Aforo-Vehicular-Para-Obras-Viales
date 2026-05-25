@@ -1,108 +1,42 @@
 # Sistema Inteligente de Aforo Vehicular para Obras Viales
 
-Diseño e implementación de un sistema de visión artificial para el conteo y monitoreo vehicular en zonas de obra vial. Proyecto desarrollado para la materia de Análisis de Algoritmos.
+Este proyecto es un sistema de visión artificial en Python diseñado para monitorear, contar y analizar el flujo vehicular en tiempo real mediante el uso de redes neuronales (YOLO) y algoritmos espaciales (DBSCAN). 
 
-Este proyecto surge como solución a la necesidad de automatizar la recolección de datos de tráfico en zonas de construcción, tareas que tradicionalmente se realizan de manera manual por personal en campo expuesto a riesgos.
+El sistema está empaquetado en una interfaz gráfica moderna orientada a entornos de monitoreo vial profesional y permite comprimir datos de telemetría localmente usando el algoritmo de Huffman.
 
----
+## Características Principales
+- **Conteo Vehicular Bidireccional:** Tracking persistente usando YOLO y cruces de línea virtual adaptativa.
+- **Detección de Congestiones:** Algoritmos de clustering espacial que detectan si los autos forman un embotellamiento.
+- **Análisis de Fluidez:** Clasifica el tráfico (libre, moderado, denso, congestionado) basado en densidad y velocidad de flujo.
+- **GUI Profesional:** Un panel de control tipo centro de monitoreo que integra video, gráficas en vivo y consolas de reportes.
+- **Exportación a Huffman:** Capacidad real para empaquetar y comprimir los json generados a archivos binarios de bajo peso (ideal para redes de bajo ancho de banda).
 
-## Objetivos del Proyecto
+## Requisitos e Instalación
 
-* **Detectar vehículos:** Identificar autos, camiones, motocicletas y bicicletas mediante análisis de video.
-* **Contabilizar el flujo vehicular:** Registrar de forma automática el volumen de vehículos que cruzan por una línea adaptativa.
-* **Analizar comportamiento:** Determinar la velocidad promedio de marcha, el nivel de congestión e identificar agrupaciones de riesgo.
-* **Procesar localmente:** Operar de manera 100% local sin requerir de servicios en la nube o conexión a internet una vez inicializado el modelo de detección.
-
----
-
-## Tecnologías Utilizadas
-
-* **Backend:** Python 3.x, OpenCV (procesamiento de imágenes y video), Ultralytics YOLO (modelo de detección y rastreo de objetos).
-* **Frontend:** HTML5, CSS3, JavaScript (Chart.js para las gráficas de flujo en tiempo real y distribución de horas pico).
-* **Compresión:** Algoritmo de Huffman nativo implementado en JavaScript para exportación de datos.
-
----
-
-## Arquitectura de Datos Local
-
-El sistema utiliza una arquitectura desacoplada basada en archivos para permitir su funcionamiento sin conexión a internet:
-
-* El script de Python procesa el video, calcula las métricas y sobrescribe el archivo `data/metrics_live.json` cada 10 frames para mantener los datos en tiempo real.
-* Paralelamente, el script añade un registro histórico cada 150 frames al archivo diario en formato JSONL (`data/logs/metrics_YYYY-MM-DD.jsonl`).
-* El frontend de JavaScript realiza consultas periódicas (polling) cada 2 segundos a estos archivos locales a través de peticiones HTTP locales.
-
----
-
-## Instrucciones de Instalación y Uso
-
-### Requisitos Previos
-
-1. Instalar Python 3.x en el equipo.
-2. Crear y activar un entorno virtual de Python:
-   ```bash
-   python -m venv venv
-   # En Windows:
-   venv\Scripts\activate
-   ```
-3. Instalar las dependencias necesarias:
+1. Asegúrate de tener Python 3.9+ instalado.
+2. Instala las dependencias necesarias:
    ```bash
    pip install -r requirements.txt
    ```
 
-### Ejecución del Sistema
+## Ejecución del Sistema
 
-El sistema requiere la ejecución de dos procesos de forma simultánea. Abre dos terminales diferentes en la carpeta raíz del proyecto y ejecuta los siguientes comandos:
-
-#### Proceso 1: Ejecutar el procesamiento de video en Python
-
-* **Ejecutar con el video de prueba predeterminado:**
-  ```bash
-  python src/main.py
-  ```
-* **Ejecutar utilizando la cámara web en tiempo real:**
-  ```bash
-  python src/main.py --webcam
-  ```
-* **Ejecutar especificando otro archivo de video:**
-  ```bash
-  python src/main.py --video ruta/de/tu_video.mp4
-  ```
-
-*(Nota: En la ventana del video puedes presionar la tecla 'Q' para detener la ejecución, o la tecla 'E' para exportar un resumen manual).*
-
-#### Proceso 2: Iniciar el servidor local para el Dashboard
-
-En la segunda terminal, inicia el servidor estático web de Python:
+Arranca la aplicación mediante su módulo principal:
 ```bash
-python -m http.server 8080
+python -m src.app
 ```
 
-### Visualizar el Dashboard
+Una vez abierto:
+1. Dale al botón **Iniciar** o usa **Cambiar Video** si deseas cargar tu propio archivo MP4.
+2. El sistema se auto-calibrará en los primeros 30 frames.
+3. Puedes habilitar los reportes automáticos en consola (5s, 10s, 30s) o presionar "Exportar JSON / Huffman" de forma manual.
+4. Usa "Descomprimir Reporte" para validar la tasa de compresión y ver los datos empaquetados.
 
-Abre tu navegador de preferencia e ingresa a la siguiente dirección:
+## Organización del Proyecto
 
-[http://localhost:8080/frontend/src/index.html](http://localhost:8080/frontend/src/index.html)
-
-El frontend mostrará automáticamente las métricas de conteo, estado del tráfico, agrupaciones y el gráfico de barras correspondiente a las horas pico del día actual.
-
----
-
-## Estructura de Archivos del Proyecto
-
-* `src/main.py`: Punto de entrada que gestiona la captura y el flujo de detección.
-* `src/config.py`: Definición de rutas del sistema y parámetros de optimización.
-* `src/storage/json_writer.py`: Lógica para escribir el JSON en vivo y el historial diario en formato JSONL.
-* `frontend/src/index.html`: Estructura del panel de visualización.
-* `frontend/src/app.js`: Script de actualización del Dashboard, manejo de gráficas y compresión Huffman.
-* `data/`: Carpeta que almacena los videos de prueba y los registros JSON/JSONL autogenerados.
-
----
-
-## Equipo de Desarrollo
-
-* Luna Gallegos Nayeli Ximena
-* Martínez Martínez Axel Guillermo
-* Mijares Ahuatzi Juan Carlos
-
-**Universidad - 5to Semestre**  
-Materia: *Análisis de Algoritmos*
+- `src/app.py` y `__main__.py`: Lanzadores.
+- `src/gui.py`: Contiene toda la lógica de la interfaz (CustomTkinter) y conecta con el pipeline visual.
+- `src/analytics/`: Matemáticas puras. Clustering espacial, grafos, cálculo de métricas de congestión y algoritmos de compresión.
+- `src/pipeline/`: El orquestador que fusiona los datos de YOLO y la analítica.
+- `src/detection/`: Maneja el modelo neuronal y los parámetros de inferencia.
+- `docs/Explicacion_Sistema.md`: Una guía rápida de cómo funciona matemáticamente el sistema para exposiciones o consultas técnicas.

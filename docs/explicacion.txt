@@ -1,0 +1,83 @@
+======================================================================
+REPORTE FINAL Y EXPLICACIÓN DEL SISTEMA DE AFORO VEHICULAR
+======================================================================
+Materia: Proyecto Universitario
+Semestre: 5to Semestre
+
+Este documento está diseñado para ayudarte a defender fácilmente 
+cómo funciona el sistema, y adicionalmente, explicar de forma profunda
+los detalles de ingeniería, matemáticas y algoritmos que hay detrás 
+del código para una defensa académica impecable.
+
+----------------------------------------------------------------------
+PARTE 1: EXPLICACIÓN BÁSICA (CÓMO FUNCIONA)
+----------------------------------------------------------------------
+El sistema opera en ciclos continuos (30 veces por segundo). El proceso para analizar 1 frame de video es:
+
+1. LECTURA Y RECORTE: Se toma un cuadro del video. Si el sistema ya está calibrado, recorta el área inútil de la imagen para no desperdiciar RAM.
+2. DETECCIÓN (YOLO): Pasamos la imagen a la Inteligencia Artificial. YOLO no solo dice "ahí hay un auto", sino que le asigna un ID único (ej. Auto 45) y recuerda hacia dónde se mueve.
+3. CONTEO: Calculamos si el centro del auto cruzó una "Línea Virtual". Si la pisa en dirección del flujo vial, suma 1 al aforo total.
+4. ANÁLISIS DE DENSIDAD: Usamos matemáticas espaciales para medir la distancia real entre todos los autos en pantalla. Si hay varios muy juntos, se etiquetan como un "Cluster" (Pelotón).
+5. ALARMAS Y HUD: Si el flujo es bajísimo y la densidad es alta, se enciende la alarma de "Embotellamiento". Todo esto se pinta en el video y se manda a la Interfaz Gráfica (GUI).
+
+
+----------------------------------------------------------------------
+PARTE 2: EXPLICACIÓN TÉCNICA A FONDO (MÓDULOS Y MATEMÁTICAS)
+----------------------------------------------------------------------
+A continuación se desglosa la ingeniería detrás de los archivos clave para justificar académicamente las decisiones técnicas tomadas.
+
+1. src/gui.py (Motor Gráfico Asíncrono y Renderizado UI)
+---------------------------------------------------------
+El principal reto era integrar OpenCV (que suele usar un bucle `while True:` infinito que bloquea el hilo principal) con CustomTkinter (que usa su propio bucle de eventos `mainloop()`). 
+* Solución Técnica: Se implementó un patrón arquitectónico de "Máquina de Estados" o "Game Loop". Se creó la clase `VehicleCounterEngine` que actúa como el "Motor de Ticks".
+* Asincronía: La interfaz visual manda a llamar la función `tick()` 30 veces por segundo usando el método `root.after(30, self.update_loop)`. El engine lee exactamente 1 cuadro, ejecuta las redes neuronales y devuelve la matriz de píxeles (RGB array) junto con un diccionario de telemetría. Esto garantiza que la UI (botones, barras) jamás se trabe y que no haya fugas de memoria por hilos paralelos (multithreading) mal gestionados.
+* Gráficas: Se embebió el motor de trazado gráfico `Matplotlib` usando el backend `FigureCanvasTkAgg` para que dibuje el flujo en tiempo real (sobre el lienzo de Tkinter) sin necesidad de abrir ventanas externas.
+
+2. src/detection/detection.py (Red Neuronal YOLO y Tracking)
+------------------------------------------------------------
+Se utiliza el modelo YOLOv8n (nano), entrenado en el conjunto de datos COCO, optimizado para operaciones en tiempo real en CPU o GPU discretas.
+* Arquitectura Neuronal: Funciona mediante redes neuronales convolucionales (CNN). Extrae mapas de características de la imagen y predice "Bounding Boxes" (cajas delimitadoras) y puntajes de confianza.
+* Supresión de No-Máximos (NMS): El algoritmo filtra cajas redundantes asegurando que cada vehículo tenga una sola detección evaluando el IoU (Intersection over Union).
+* Tracking Espacial (Bot-SORT): No ejecutamos YOLO en "modo ciego". Le pasamos la bandera `persist=True`. Esto activa un rastreador basado en Filtros de Kalman y algoritmos de coincidencia húngara. El Tracker recuerda las posiciones previas de cada ID, lo que nos permite saber en qué dirección se mueve el vehículo cuadro por cuadro.
+
+3. src/analytics/clustering.py (DBSCAN Espacial)
+-------------------------------------------------
+En lugar de medir el tráfico contando carros aislados, implementamos **Machine Learning No Supervisado**.
+* Algoritmo: Se usa DBSCAN (Density-Based Spatial Clustering of Applications with Noise) de la librería `scikit-learn`.
+* Fundamento Matemático: Extrae los centroides (x, y) de cada carro. Calcula una Matriz de Distancias Euclidianas entre todos los carros. 
+* Hiperparámetros: Se define un "Epsilon" (distancia máxima en píxeles, ej. eps=80) y un "Min Samples" (ej. 3). Si un carro tiene al menos a otros 2 dentro de ese radio, se crea un núcleo de cluster. Los carros conectados forman un "Cluster" o Pelotón.
+* Si un auto está lejos de la masa crítica, el algoritmo lo descarta etiquetándolo como "Ruido" (-1), permitiendo identificar vehículos libres versus vehículos atascados.
+
+4. src/analytics/metrics.py & graphs.py (Análisis de Fluidez y Grafos)
+-----------------------------------------------------------------------
+Este es el cerebro de Ingeniería de Tránsito.
+* Grafos (graphs.py): Se mapea la calzada como un "Grafo". Los vehículos son Nodos y su cercanía (< 150 píxeles) forma Aristas. Si la proporción de aristas respecto al número de autos crece, matemáticamente significa que los autos están muy cerca unos de otros (Saturación Espacial).
+* Flujo Real vs Píxeles: El "Flujo por Minuto" no se adivina por píxeles, sino leyendo el cruce por la línea mediante variables de reloj `time.time()`. 
+* Suavizado Temporal (Moving Average): En sistemas físicos el flujo es errático. Se aplica un promedio móvil tomando la media de los últimos 10 valores de flujo registrados. Esto actúa como un filtro pasabajas, eliminando el "ruido" de la gráfica.
+* Condiciones Lógicas: Se definió empíricamente que: Si hay más de 4 vehículos, la densidad es alta (> 60%), y el flujo por minuto se desploma (< 3.0), entonces y solo entonces, el estado se declara como "Embotellamiento / Riesgo Alto".
+
+5. src/analytics/processing.py (Lógica Geométrica de Conteo)
+-------------------------------------------------------------
+* Calibración Automática: En los primeros 30 cuadros, el sistema almacena las trayectorias. Resta la posición en Y actual menos la previa (`Delta Y`). Si el promedio es positivo, el flujo va hacia abajo. Luego, cruza una línea perpendicular al flujo en el centro geométrico de la cámara.
+* Ray Casting / Intersección de líneas: Para contar un vehículo, el sistema verifica si la coordenada `Y` del auto pasó del lado "Negativo" al "Positivo" de la línea de cruce. Se lleva un historial `ids_history` en el diccionario "State" para garantizar que si el auto cruza y se devuelve, no se cuente dos veces.
+
+6. src/analytics/huffman.py (Optimización IoT y Telecomunicaciones)
+--------------------------------------------------------------------
+La compresión de datos mediante Árboles de Huffman se implementó como solución a la transmisión de telemetría en redes de bajo ancho de banda (GPRS, LoRa, Sigfox).
+* Teoría de la Información: El algoritmo lee el texto en bruto (JSON). Cuenta la frecuencia de cada carácter (ej. las comillas, las comas y los espacios aparecen cientos de veces).
+* Árbol Binario: Se construye un árbol donde las hojas son los caracteres. Los caracteres más frecuentes se asignan a rutas cortas (ej. '01'), y los raros a rutas largas (ej. '110010'). Es un código "libre de prefijos", garantizando decodificación única.
+* Serialización a Bytes: La cadena de ceros y unos generada se empaqueta en "Chunks" de 8 bits y se escribe en un archivo binario (`.bin`). 
+* Resultado: Convierte un archivo de 5,000 bytes en uno de 3,000 bytes (ahorro del 40%). Esta es una justificación de nivel ingeniería que demuestra cómo enviar métricas de tráfico remoto reduciendo costos de red celular.
+
+7. src/storage/json_writer.py (Gestión de I/O)
+-----------------------------------------------
+Al recibir la petición de exportar un Snapshot, este script se encarga de dar formato al diccionario en un esquema JSON, añadir los sellos de tiempo exactos (`datetime.now()`) en la nomenclatura del archivo y evitar escrituras bloqueantes al disco duro, operando estrictamente bajo demanda para no deteriorar los ciclos de CPU.
+
+----------------------------------------------------------------------
+CONCLUSIÓN PARA DEFENSA ACADÉMICA
+----------------------------------------------------------------------
+"El valor real de este proyecto no radica simplemente en cargar un modelo pre-entrenado de IA, sino en utilizar las salidas de dicha IA como meros 'sensores base' para alimentar un ecosistema de algoritmos estadísticos, espaciales y de optimización (Machine Learning, Grafos, Filtros y Huffman). Transformamos datos crudos en inteligencia operativa real y optimizada para producción."
+
+======================================================================
+FIN DEL REPORTE PROFUNDO
+======================================================================

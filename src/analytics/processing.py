@@ -136,7 +136,7 @@ def count_vehicles(detections, state):
 
     return state["total_count"], line
 
-def export_summary_json_huffman(metrics):
+def export_summary_json_huffman(data, is_history=False):
     # IMPORTACIÓN LOCAL (Evita que el programa se rompa por dependencias circulares)
     from src.analytics.huffman import comprimir_texto_huffman
     from datetime import datetime
@@ -146,25 +146,40 @@ def export_summary_json_huffman(metrics):
 
     export_dir = LOGS_DIR.parent / "json"
     os.makedirs(export_dir, exist_ok=True)
+    
+    now = datetime.now()
+    fecha_hoy = now.strftime("%Y%m%d")
+    fecha_hora = now.strftime("%Y%m%d_%H%M%S")
+    
+    if is_history:
+        base_name = f"huffman_historial_{fecha_hoy}_{fecha_hora}"
+        contenido = {
+            "reporte_generado": now.strftime("%Y-%m-%d %H:%M:%S"),
+            "tipo": "HISTORIAL_COMPLETO",
+            "total_registros": len(data),
+            "registros": data
+        }
+    else:
+        base_name = f"huffman_instante_{fecha_hoy}_{fecha_hora}"
+        contenido = {
+            "reporte_generado": now.strftime("%Y-%m-%d %H:%M:%S"),
+            "tipo": "INSTANTE_EXACTO",
+            "aforo_total_acumulado": data.get("total_count", 0),
+            "tasa_flujo_actual_por_min": data.get("flujo_por_minuto", 0),
+            "vehiculos_en_escena": data.get("total_vehicles", 0),
+            "estado_general_via": data.get("fluidez_avance", "N/A"),
+            "riesgo_de_embotellamiento": data.get("alerta_embotellamiento", False)
+        }
         
-    export_file = export_dir / "traffic_data_compressed.bin"
-    dict_file = export_dir / "traffic_data_dict.json"
+    export_file = export_dir / f"{base_name}.bin"
+    dict_file = export_dir / f"{base_name}_dict.json"
     
-    resumen = {
-        "reporte_generado": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-        "aforo_total_acumulado": metrics.get("total_count", 0),
-        "tasa_flujo_actual_por_min": metrics.get("flujo_por_minuto", 0),
-        "vehiculos_en_escena": metrics.get("total_vehicles", 0),
-        "estado_general_via": metrics.get("fluidez_avance", "N/A"),
-        "riesgo_de_embotellamiento": metrics.get("alerta_embotellamiento", False)
-    }
-    
-    json_str = json.dumps(resumen, ensure_ascii=False)
+    json_str = json.dumps(contenido, ensure_ascii=False)
     texto_binario, diccionario_codigos = comprimir_texto_huffman(json_str)
     
     if not texto_binario:
         return
-
+        
     b = bytearray()
     for i in range(0, len(texto_binario), 8):
         byte_chunk = texto_binario[i:i+8].ljust(8, '0')
@@ -188,5 +203,8 @@ def export_summary_json_huffman(metrics):
         print(f" 📈 Ahorro de espacio: {tasa_compresion:.2f}%")
         print("="*55 + "\n")
         
+        return export_file.name, dict_file.name
+        
     except Exception as e:
         print(f"⚠️ Error: {e}")
+        return None, None

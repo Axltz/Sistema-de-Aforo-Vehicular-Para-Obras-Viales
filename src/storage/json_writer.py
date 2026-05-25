@@ -62,27 +62,43 @@ def save_metrics_local(metrics, append_to_log=False):
             print(f"⚠️ Error al escribir en el historial jsonl: {e}")
 
 
-def export_summary_json(metrics):
+def export_summary_json(data, is_history=False):
     """
-    Exporta un resumen bonito e instantáneo de la situación actual.
-    Se ejecuta cuando el usuario presiona la tecla 'E'.
+    Exporta un resumen (o historial) con marca de tiempo en el nombre del archivo.
     """
     export_dir = LOGS_DIR.parent / "json"
     os.makedirs(export_dir, exist_ok=True)
         
-    export_file = export_dir / "traffic_data.json"
+    now = datetime.now()
+    fecha_hoy = now.strftime("%Y%m%d")
+    fecha_hora = now.strftime("%Y%m%d_%H%M%S")
     
-    resumen = {
-        "reporte_generado": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-        "aforo_total_acumulado": metrics.get("total_count", 0),
-        "tasa_flujo_actual_por_min": metrics.get("flujo_por_minuto", 0),
-        "vehiculos_en_escena": metrics.get("total_vehicles", 0),
-        "estado_general_via": metrics.get("fluidez_avance", "N/A"),
-        "riesgo_de_embotellamiento": metrics.get("alerta_embotellamiento", False)
-    }
+    if is_history:
+        # data será una lista de registros
+        export_file = export_dir / f"reporte_historial_{fecha_hoy}_{fecha_hora}.json"
+        contenido = {
+            "reporte_generado": now.strftime("%Y-%m-%d %H:%M:%S"),
+            "tipo": "HISTORIAL_COMPLETO",
+            "total_registros": len(data),
+            "registros": data
+        }
+    else:
+        # data es el objeto metrics del momento
+        export_file = export_dir / f"reporte_instante_{fecha_hoy}_{fecha_hora}.json"
+        contenido = {
+            "reporte_generado": now.strftime("%Y-%m-%d %H:%M:%S"),
+            "tipo": "INSTANTE_EXACTO",
+            "aforo_total_acumulado": data.get("total_count", 0),
+            "tasa_flujo_actual_por_min": data.get("flujo_por_minuto", 0),
+            "vehiculos_en_escena": data.get("total_vehicles", 0),
+            "estado_general_via": data.get("fluidez_avance", "N/A"),
+            "riesgo_de_embotellamiento": data.get("alerta_embotellamiento", False)
+        }
     
     try:
         with open(export_file, "w", encoding="utf-8") as f:
-            json.dump(resumen, f, indent=4, ensure_ascii=False)
+            json.dump(contenido, f, indent=4, ensure_ascii=False)
+        return export_file.name
     except Exception as e:
         print(f"⚠️ Error al exportar resumen JSON: {e}")
+        return None

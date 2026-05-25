@@ -1,9 +1,3 @@
-# ==============================================================================
-# main.py - PUNTO DE ENTRADA DEL SISTEMA (VERSIÓN 100% LOCAL & OFFLINE)
-# ==============================================================================
-# Este archivo es el "motor" principal. Su trabajo es abrir la fuente de video 
-# (archivo .mp4 o webcam), leer los frames, ejecutar la detección optimizada 
-# (con frame skipping) y escribir los resultados en archivos JSON/JSONL locales.
 
 import cv2
 import numpy as np

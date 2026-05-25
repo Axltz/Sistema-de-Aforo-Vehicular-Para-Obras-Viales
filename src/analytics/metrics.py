@@ -131,58 +131,68 @@ def calculate_metrics(vehiculos_flujo_objetivo, grafo_interaccion_espacial, grup
     conteo_grupos_activos = len(grupos_espaciales_activos)
     
     # 2. ANÁLISIS DE INTERACCIÓN (Saturación de la vía)
-    # Se evalúa qué tan agrupados físicamente están los autos en el carril.
-    if conteo_vehiculos_escena > 1:
+    if conteo_vehiculos_escena >= 4:
         ratio_agrupamiento = 1.0 - (conteo_grupos_activos / conteo_vehiculos_escena)
-        
         total_conexiones = sum([len(conexiones) for conexiones in grafo_interaccion_espacial.values()])
         densidad_conexiones = total_conexiones / (conteo_vehiculos_escena * 4)
-        
         porcentaje_interaccion_espacial = (ratio_agrupamiento * 0.7 + densidad_conexiones * 0.3) * 100
     else:
-        porcentaje_interaccion_espacial = 0
+        # Si hay muy pocos autos, no puede haber saturación, incluso si están muy cerca entre sí.
+        porcentaje_interaccion_espacial = conteo_vehiculos_escena * 5.0
         
     porcentaje_interaccion_espacial = min(100.0, porcentaje_interaccion_espacial)
 
     # 3. ANÁLISIS DE FLUJO VEHICULAR (Cruces de línea reales por Minuto)
-    # En lugar de usar píxeles, evaluamos el comportamiento de cruce en tiempo real.
     timestamps = estado_sistema_aforo.get("crossing_timestamps", [])
     current_time = time.time()
     
     if len(timestamps) >= 2:
-        # Tiempo transcurrido entre el primer cruce registrado e histórico
         tiempo_transcurrido = max(1.0, current_time - timestamps[0])
         flujo_por_minuto = (len(timestamps) / tiempo_transcurrido) * 60.0
     elif len(timestamps) == 1:
-        flujo_por_minuto = 1.0 # Al menos 1 vehículo ha cruzado la línea
+        flujo_por_minuto = 1.0
     else:
         flujo_por_minuto = 0.0
         
-    # A) Diagnóstico de Tasa de Marcha (Volumen de tráfico)
-    if flujo_por_minuto > 30: 
+    # SUAVIDAD TEMPORAL: Promediar con el flujo de los últimos frames para evitar saltos bruscos
+    historial = estado_sistema_aforo.get("metrics_history", [])
+    if historial:
+        flujos_previos = [m.get("flujo_por_minuto", 0) for m in historial[-10:]]
+        flujo_suavizado = (sum(flujos_previos) + flujo_por_minuto) / (len(flujos_previos) + 1)
+        flujo_por_minuto = flujo_suavizado
+
+    # A) Diagnóstico de Tasa de Marcha (Volumen de tráfico ajustado)
+    if flujo_por_minuto > 40: 
         velocidad_marcha = "FLUJO ALTO"
-    elif flujo_por_minuto > 10: 
+    elif flujo_por_minuto > 15: 
         velocidad_marcha = "FLUJO MODERADO"
     elif flujo_por_minuto > 0: 
         velocidad_marcha = "FLUJO BAJO"
     else: 
-        velocidad_marcha = "SIN FLUJO / DETENIDO"
+        velocidad_marcha = "SIN FLUJO"
         
-    # B) Diagnóstico Cualitativo de la Vía (Clasificación oficial de Ingeniería de Tránsito)
+    # TENDENCIA DEL TRÁFICO
+    tendencia = "ESTABLE"
+    if len(historial) > 15:
+        flujo_viejo = sum([m.get("flujo_por_minuto", 0) for m in historial[:5]]) / 5
+        flujo_reciente = sum([m.get("flujo_por_minuto", 0) for m in historial[-5:]]) / 5
+        if flujo_reciente > flujo_viejo * 1.2:
+            tendencia = "AUMENTANDO"
+        elif flujo_reciente < flujo_viejo * 0.8:
+            tendencia = "DISMINUYENDO"
+
+    # B) Diagnóstico Cualitativo de la Vía (Umbrales relajados y realistas)
     if conteo_vehiculos_escena == 0:
         fluidez_avance = "VIA DESPEJADA"
-    elif porcentaje_interaccion_espacial > 70 and flujo_por_minuto < 5:
-        # Alta densidad y casi nulo avance = Embudo / Congestión
-        fluidez_avance = "CONGESTION SEVERA (Tráfico Detenido)"
-    elif porcentaje_interaccion_espacial > 50 and flujo_por_minuto > 20:
-        # Mucha densidad de autos pero avanzando rápido = Operación densa fluida
-        fluidez_avance = "TRAFICO DENSO PERO FLUIDO"
-    elif flujo_por_minuto > 10:
+    elif porcentaje_interaccion_espacial > 80 and flujo_por_minuto < 3:
+        fluidez_avance = "CONGESTION SEVERA"
+    elif porcentaje_interaccion_espacial > 60 and flujo_por_minuto > 15:
+        fluidez_avance = "TRAFICO DENSO / FLUIDO"
+    elif flujo_por_minuto > 15:
         fluidez_avance = "FLUJO LIBRE"
     else:
-        fluidez_avance = "TRAFICO LENTO"
+        fluidez_avance = "TRAFICO MODERADO"
         
-    # Construimos el diccionario base que consumirá el Dashboard y los archivos JSON
     metricas_analisis_vial = {
         "total_vehicles": conteo_vehiculos_escena,
         "conteo_grupos_activos": conteo_grupos_activos,
@@ -191,6 +201,7 @@ def calculate_metrics(vehiculos_flujo_objetivo, grafo_interaccion_espacial, grup
         "fluidez_avance": fluidez_avance,
         "flujo_por_minuto": round(flujo_por_minuto, 1),
         "total_count": estado_sistema_aforo.get("total_count", 0),
+        "tendencia": tendencia,
         "prev_ids_pos": {} 
     }
     
@@ -202,17 +213,17 @@ def calculate_metrics(vehiculos_flujo_objetivo, grafo_interaccion_espacial, grup
         conteo_grupo = len(vehiculos_en_grupo)
         densidad_grupo = (conteo_grupo / conteo_vehiculos_escena * 100) if conteo_vehiculos_escena > 0 else 0
         
-        # Inteligencia de Tránsito:
-        # Si un grupo de autos tiene 3 o más vehículos Y la tasa de flujo es bajísima (< 5 veh/min),
-        # significa que están atascados o atrapados en obras. Lo declaramos "Zona de Riesgo" (Riesgo ALTO).
-        if flujo_por_minuto < 5.0 and conteo_grupo >= 3:
+        # Riesgo más inteligente: requiere 4+ autos y flujo bajísimo para ser "Embotellamiento"
+        if flujo_por_minuto < 3.0 and conteo_grupo >= 4:
             riesgo = "ALTO"
-            nombre_final = "Zona de Riesgo"
+            nombre_final = "Embotellamiento"
             alerta_activa = True
+        elif conteo_grupo >= 3 and flujo_por_minuto < 10.0:
+            riesgo = "MEDIO"
+            nombre_final = "Trafico Lento"
         else:
-            # Si hay buen flujo, es simplemente un grupo de autos avanzando normalmente (Riesgo BAJO).
             riesgo = "BAJO"
-            nombre_final = "Grupo de Vehiculos"
+            nombre_final = "Peloton en Movimiento"
             
         metricas_congestiones.append({
             "nombre": nombre_final,
