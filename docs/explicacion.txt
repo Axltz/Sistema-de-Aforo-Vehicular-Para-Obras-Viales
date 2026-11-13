@@ -4,10 +4,9 @@ REPORTE FINAL Y EXPLICACIÓN DEL SISTEMA DE AFORO VEHICULAR
 Materia: Proyecto Universitario
 Semestre: 5to Semestre
 
-Este documento está diseñado para ayudarte a defender fácilmente 
-cómo funciona el sistema, y adicionalmente, explicar de forma profunda
+Este documento está diseñado para explicar cómo funciona el sistema, y adicionalmente, explicar de forma profunda
 los detalles de ingeniería, matemáticas y algoritmos que hay detrás 
-del código para una defensa académica impecable.
+del código.
 
 ----------------------------------------------------------------------
 PARTE 1: EXPLICACIÓN BÁSICA (CÓMO FUNCIONA)
