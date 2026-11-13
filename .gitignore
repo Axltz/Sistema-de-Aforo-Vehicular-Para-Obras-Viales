@@ -1,3 +1,28 @@
+# ==============================================================================
+# Project-specific ignores
+# ==============================================================================
+
+# Local-only study/interview notes (never commit)
+STUDY_AND_INTERVIEW_GUIDE.md
+
+# Environment variables / secrets (never commit the real .env)
+.env
+.env.*
+!.env.example
+
+# YOLO model weights (large binaries, auto-downloaded on first run)
+*.pt
+
+# Generated outputs (recreated at runtime)
+data/live_frame.jpg
+data/metrics_live.json
+data/json/
+data/logs/
+
+# ==============================================================================
+# Python (standard template)
+# ==============================================================================
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]

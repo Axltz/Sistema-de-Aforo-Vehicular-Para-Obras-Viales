@@ -1,0 +1,11 @@
+# ==============================================================================
+# Development / CI dependencies
+# ==============================================================================
+# Includes the runtime requirements plus the tools used for linting and testing.
+# Install with:  pip install -r requirements-dev.txt
+# ==============================================================================
+
+-r requirements.txt
+
+flake8==7.1.1
+pytest==8.3.3

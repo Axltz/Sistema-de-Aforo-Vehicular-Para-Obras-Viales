@@ -1,42 +1,44 @@
 # ==============================================================================
-# clustering.py - EL AGRUPADOR (Inteligencia Espacial)
+# clustering.py - THE CLUSTERER (Spatial Intelligence)
 # ==============================================================================
-# Este módulo se encarga de analizar las distancias físicas entre todos los
-# vehículos en pantalla. Su meta es detectar cuándo los autos están formando un (grupo) porque van muy pegados.
+# This module analyzes the physical distances between all on-screen vehicles.
+# Its goal is to detect when vehicles form a cluster because they are too close.
 
 import numpy as np
 from sklearn.cluster import DBSCAN
 
-def detect_traffic_clusters(vehiculos_detectados, dimensiones_frame):
+
+def detect_traffic_clusters(detections, frame_dimensions):
     """
-    Agrupa vehículos por proximidad física (congestión).
-    Sirve para identificar cuellos de botella en zonas de obra.
+    Groups vehicles by physical proximity (congestion).
+    Helps identify bottlenecks in roadwork zones.
     """
-    if not vehiculos_detectados: 
+    if not detections:
         return {}
-    
-    alto, ancho = dimensiones_frame[:2]
-    centros = np.array([v["center"] for v in vehiculos_detectados])
-    
-    # PARAMETRO 1: Epsilon (eps)
-    # Define la distancia máxima entre dos autos para considerarlos "vecinos".
-    # Usamos el 10% del ancho del video (Agrupa autos a unos 3-4 metros de distancia real)
-    eps_distancia = ancho * 0.10 
-    
-    # PARAMETRO 2: min_samples
-    # Define cuántos autos juntos se necesitan para formar un "Grupo".
-    # min_samples=3 para ignorar parejitas de autos (eso es tráfico normal).
-    # Solo nos importan bultos de 3 o más carros pegados.
-    db = DBSCAN(eps=eps_distancia, min_samples=3).fit(centros)
-    
-    grupos = {}
-    for i, etiqueta in enumerate(db.labels_):
-        if etiqueta == -1: continue 
-        
-        nombre_grupo = f"Congestion_{etiqueta}"
-        if nombre_grupo not in grupos:
-            grupos[nombre_grupo] = []
-            
-        grupos[nombre_grupo].append(vehiculos_detectados[i]["id"])
-        
-    return grupos
+
+    height, width = frame_dimensions[:2]
+    centers = np.array([v["center"] for v in detections])
+
+    # PARAMETER 1: Epsilon (eps)
+    # Defines the maximum distance between two vehicles to consider them "neighbors".
+    # We use 10% of the video width (groups vehicles ~3-4 meters apart in real distance).
+    eps_distance = width * 0.10
+
+    # PARAMETER 2: min_samples
+    # Defines how many vehicles together are needed to form a "cluster".
+    # min_samples=3 ignores pairs of vehicles (that is normal traffic).
+    # We only care about groups of 3 or more closely packed vehicles.
+    db = DBSCAN(eps=eps_distance, min_samples=3).fit(centers)
+
+    clusters = {}
+    for i, label in enumerate(db.labels_):
+        if label == -1:
+            continue
+
+        cluster_name = f"Congestion_{label}"
+        if cluster_name not in clusters:
+            clusters[cluster_name] = []
+
+        clusters[cluster_name].append(detections[i]["id"])
+
+    return clusters

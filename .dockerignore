@@ -1,0 +1,43 @@
+# ==============================================================================
+# .dockerignore - keep the Docker build context small and clean
+# ==============================================================================
+
+# Version control and CI metadata
+.git
+.github
+
+# Python caches and build artifacts
+**/__pycache__
+*.py[cod]
+*.egg-info
+.pytest_cache
+.mypy_cache
+.ruff_cache
+
+# Virtual environments
+.venv
+venv
+env
+ENV
+
+# Secrets and local environment files (never bake them into the image)
+.env
+.env.*
+!.env.example
+
+# Documentation and heavy artifacts not needed at runtime
+docs
+*.pdf
+README.md
+
+# Duplicate model weights at the repository root (models/ is kept)
+/yolo26n.pt
+
+# Generated runtime outputs (use a volume instead)
+data/json
+data/logs
+data/live_frame.jpg
+data/metrics_live.json
+
+# Tests and dev tooling are not needed to run the application
+tests

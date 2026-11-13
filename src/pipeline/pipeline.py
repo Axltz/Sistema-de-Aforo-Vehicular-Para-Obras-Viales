@@ -1,49 +1,49 @@
 # ==============================================================================
-# pipeline.py - TUBERÍA (PIPELINE) CENTRAL DE PROCESAMIENTO ANALÍTICO
+# pipeline.py - CENTRAL ANALYTICAL PROCESSING PIPELINE
 # ==============================================================================
-# Este módulo es la "central de conexiones" que unifica todos los sub-módulos
-# analíticos. Recibe las detecciones crudas de YOLO, y secuencialmente orquesta
-# el grafo de proximidad, el agrupamiento de vehículos (clustering) y los cálculos viales.
+# This module is the "connection hub" that unifies all the analytical
+# sub-modules. It receives raw YOLO detections and sequentially orchestrates the
+# proximity graph, vehicle clustering and road calculations.
 
-import numpy as np
-from src.analytics.metrics import calculate_metrics
-from src.analytics.clustering import detect_traffic_clusters 
+from src.analytics.clustering import detect_traffic_clusters
 from src.analytics.graphs import build_proximity_graph
-from src.analytics.processing import count_vehicles, calibrate_system
+from src.analytics.metrics import calculate_metrics
 
-def process_frame(vehiculos_detectados, dimensiones_frame, estado_sistema_aforo):
+
+def process_frame(detections, frame_dimensions, traffic_state):
     """
-    Orquesta el flujo completo de inteligencia vial en cada cuadro procesado:
-      Paso 1: Construye el Grafo de Proximidad entre autos (conexiones).
-      Paso 2: Detecta agrupamientos físicos (Clustering con DBSCAN).
-      Paso 3: Realiza los cálculos físicos de tránsito (Flujo, Densidad, Alertas).
-      Paso 4: Gestiona la pila temporal de historial de métricas para análisis dinámico.
+    Orchestrates the full road-intelligence flow on every processed frame:
+      Step 1: Build the proximity graph between vehicles (connections).
+      Step 2: Detect physical clusters (DBSCAN clustering).
+      Step 3: Perform the physical traffic calculations (flow, density, alerts).
+      Step 4: Manage the rolling metrics history for dynamic analysis.
     """
-    # Paso 1: Mapear qué autos están cerca entre sí usando grafos de proximidad
-    grafo_interaccion_espacial = build_proximity_graph(vehiculos_detectados, dimensiones_frame)
+    # Step 1: Map which vehicles are close to each other using proximity graphs
+    spatial_interaction_graph = build_proximity_graph(detections, frame_dimensions)
 
-    # Paso 2: Identificar pelotones o atascos de vehículos con DBSCAN
-    grupos_espaciales_activos = detect_traffic_clusters(vehiculos_detectados, dimensiones_frame)
+    # Step 2: Identify platoons or traffic jams with DBSCAN
+    active_spatial_clusters = detect_traffic_clusters(detections, frame_dimensions)
 
-    # Paso 3: Calcular el estado cualitativo de la vía y tasas de flujo por minuto
-    metricas_analisis_vial = calculate_metrics(
-        vehiculos_detectados, 
-        grafo_interaccion_espacial, 
-        grupos_espaciales_activos, 
-        dimensiones_frame, 
-        estado_sistema_aforo
+    # Step 3: Calculate the qualitative road state and per-minute flow rates
+    traffic_metrics = calculate_metrics(
+        detections,
+        spatial_interaction_graph,
+        active_spatial_clusters,
+        frame_dimensions,
+        traffic_state
     )
 
-    # Paso 4: Agregar las métricas al historial interno y mantenerlo limpio (máx 30 frames)
-    # Esto previene fugas de memoria y permite comparar variaciones dinámicas a corto plazo.
-    estado_sistema_aforo["metrics_history"].append(metricas_analisis_vial)
-    if len(estado_sistema_aforo["metrics_history"]) > 30:
-        estado_sistema_aforo["metrics_history"].pop(0)
+    # Step 4: Append the metrics to the internal history and keep it bounded
+    # (max 30 frames). This prevents memory leaks and allows comparing
+    # short-term dynamic variations.
+    traffic_state["metrics_history"].append(traffic_metrics)
+    if len(traffic_state["metrics_history"]) > 30:
+        traffic_state["metrics_history"].pop(0)
 
-    # Retorna un diccionario unificado con los resultados listos para pintar en el Monitor
+    # Return a unified dictionary ready to be painted on the monitor
     return {
-        "metrics": metricas_analisis_vial,
-        "clusters": grupos_espaciales_activos,
-        "graph": grafo_interaccion_espacial,
-        "line": estado_sistema_aforo["line"]
+        "metrics": traffic_metrics,
+        "clusters": active_spatial_clusters,
+        "graph": spatial_interaction_graph,
+        "line": traffic_state["line"]
     }

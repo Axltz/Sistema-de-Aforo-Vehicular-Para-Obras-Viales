@@ -1,245 +1,131 @@
 # ==============================================================================
-# metrics.py - MOTOR DE CÁLCULO DE MÉTRICAS VIALES Y DE TRÁFICO
+# metrics.py - TRAFFIC AND ROAD METRIC CALCULATION ENGINE
 # ==============================================================================
-# Este módulo contiene las funciones matemáticas que calculan el estado del
-# tráfico físico. Convierte coordenadas de píxeles en variables de ingeniería
-# de tránsito como Aforo, Flujo por Minuto, Densidad Espacial y Agrupamientos.
+# This module converts raw vehicle detections into traffic-engineering
+# variables: vehicle count, flow per minute, spatial density and clusters.
 
-import numpy as np
 import time
 
-def calculate_spatial_occupancy(detections, frame_shape):
+
+def calculate_metrics(target_flow_vehicles, spatial_interaction_graph, active_spatial_clusters, frame_dimensions, traffic_state):
     """
-    Calcula la Densidad Visual (Ocupación Espacial) en pantalla.
-    Suma el área (en píxeles) de todas las cajas delimitadoras de los autos
-    y la divide entre el área total de la pantalla. Retorna un valor de 0.0 a 1.0.
+    Brain function that unifies all the physical and logical road variables.
+    Calculates:
+      1. Real flow rate (vehicles per minute) based on real crossing timestamps.
+      2. Qualitative flow diagnosis (Severe Congestion, Slow Traffic, Free Flow, etc.).
+      3. Density / spatial interaction percentage on the road.
+      4. Cluster classification (moving vehicle groups vs. jammed risk zones).
     """
-    height, width = frame_shape[:2]
-    frame_area = width * height
+    vehicles_in_scene = len(target_flow_vehicles)
 
-    occupied_area = 0
+    # 1. CLUSTER ANALYSIS
+    active_cluster_count = len(active_spatial_clusters)
 
-    for detection in detections:
-        x1, y1, x2, y2 = detection["bbox"]
-        box_width = x2 - x1
-        box_height = y2 - y1
-        box_area = box_width * box_height
-        occupied_area += box_area
-
-    if frame_area == 0:
-        return 0
-        
-    occupancy = occupied_area / frame_area
-    return occupancy
-
-
-def calculate_average_speed(state):
-    """
-    Calcula el 'desplazamiento promedio' de los autos activos en el último frame.
-    Mide la distancia euclidiana recorrida por el centro de cada vehículo entre
-    el cuadro anterior y el actual. Sirve como indicador de velocidad interna.
-    """
-    speeds = []
-
-    for trajectory in state["trajectories"].values():
-        if len(trajectory) < 2:
-            continue
-
-        x1, y1 = trajectory[-2]
-        x2, y2 = trajectory[-1]
-
-        distance = np.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
-        speeds.append(distance)
-
-    if len(speeds) == 0:
-        return 0
-        
-    average_speed = np.mean(speeds)
-    return average_speed
-
-
-def calculate_average_distance(graph, detections):
-    """
-    Calcula la distancia promedio (en píxeles) entre autos interconectados.
-    Utiliza el Grafo de Proximidad para medir la distancia real entre vehículos
-    que se encuentran a menos del umbral de cercanía (Epsilon de DBSCAN).
-    """
-    centers = {}
-    for detection in detections:
-        vehicle_id = detection["id"]
-        centers[vehicle_id] = detection["center"]
-
-    distances = []
-
-    for vehicle_id, neighbors in graph.items():
-        center_a = centers.get(vehicle_id)
-        if center_a is None:
-            continue
-        for neighbor_id in neighbors:
-            center_b = centers.get(neighbor_id)
-            if center_b is None:
-                continue
-
-            x1, y1 = center_a
-            x2, y2 = center_b
-
-            distance = np.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
-            distances.append(distance)
-
-    if len(distances) == 0:
-        return 0
-
-    average_distance = np.mean(distances)
-    return average_distance
-
-
-def calculate_compactness(graph):
-    """
-    Calcula la Compactación de la red vial (Grado de conectividad).
-    Mide cuántas conexiones promedio tiene cada vehículo con sus vecinos.
-    Una compactación alta indica que los autos están muy amontonados (potencial atasco).
-    """
-    total_connections = 0
-
-    for neighbors in graph.values():
-        total_connections += len(neighbors)
-        
-    total_vehicles = len(graph)
-
-    if total_vehicles == 0:
-        return 0
-
-    compactness = total_connections / total_vehicles
-    return compactness
-
-
-PX_TO_M_X = 7.0 / 1280.0 
-PX_TO_M_Y = 50.0 / 720.0
-
-def calculate_metrics(vehiculos_flujo_objetivo, grafo_interaccion_espacial, grupos_espaciales_activos, dimensiones_frame, estado_sistema_aforo):
-    """
-    Función cerebro que unifica todas las variables físicas y lógicas de la vía.
-    Calcula:
-      1. Tasa de flujo real (vehículos por minuto) basándose en timestamps reales de cruce.
-      2. Diagnóstico cualitativo de fluidez (Congestión Severa, Tráfico Lento, Flujo Libre, etc.).
-      3. Porcentaje de densidad/interacción espacial en la calzada.
-      4. Clasificación de agrupamientos (Grupos de Vehículos en movimiento vs Zonas de Riesgo atascadas).
-    """
-    conteo_vehiculos_escena = len(vehiculos_flujo_objetivo)
-    
-    # 1. ANÁLISIS DE GRUPOS (Clustering)
-    conteo_grupos_activos = len(grupos_espaciales_activos)
-    
-    # 2. ANÁLISIS DE INTERACCIÓN (Saturación de la vía)
-    if conteo_vehiculos_escena >= 4:
-        ratio_agrupamiento = 1.0 - (conteo_grupos_activos / conteo_vehiculos_escena)
-        total_conexiones = sum([len(conexiones) for conexiones in grafo_interaccion_espacial.values()])
-        densidad_conexiones = total_conexiones / (conteo_vehiculos_escena * 4)
-        porcentaje_interaccion_espacial = (ratio_agrupamiento * 0.7 + densidad_conexiones * 0.3) * 100
+    # 2. INTERACTION ANALYSIS (road saturation)
+    if vehicles_in_scene >= 4:
+        clustering_ratio = 1.0 - (active_cluster_count / vehicles_in_scene)
+        total_connections = sum([len(connections) for connections in spatial_interaction_graph.values()])
+        connection_density = total_connections / (vehicles_in_scene * 4)
+        spatial_interaction_pct = (clustering_ratio * 0.7 + connection_density * 0.3) * 100
     else:
-        # Si hay muy pocos autos, no puede haber saturación, incluso si están muy cerca entre sí.
-        porcentaje_interaccion_espacial = conteo_vehiculos_escena * 5.0
-        
-    porcentaje_interaccion_espacial = min(100.0, porcentaje_interaccion_espacial)
+        # With very few vehicles there can be no saturation, even if they are close.
+        spatial_interaction_pct = vehicles_in_scene * 5.0
 
-    # 3. ANÁLISIS DE FLUJO VEHICULAR (Cruces de línea reales por Minuto)
-    timestamps = estado_sistema_aforo.get("crossing_timestamps", [])
+    spatial_interaction_pct = min(100.0, spatial_interaction_pct)
+
+    # 3. VEHICLE FLOW ANALYSIS (real line crossings per minute)
+    timestamps = traffic_state.get("crossing_timestamps", [])
     current_time = time.time()
-    
+
     if len(timestamps) >= 2:
-        tiempo_transcurrido = max(1.0, current_time - timestamps[0])
-        flujo_por_minuto = (len(timestamps) / tiempo_transcurrido) * 60.0
+        elapsed_time = max(1.0, current_time - timestamps[0])
+        flow_per_minute = (len(timestamps) / elapsed_time) * 60.0
     elif len(timestamps) == 1:
-        flujo_por_minuto = 1.0
+        flow_per_minute = 1.0
     else:
-        flujo_por_minuto = 0.0
-        
-    # SUAVIDAD TEMPORAL: Promediar con el flujo de los últimos frames para evitar saltos bruscos
-    historial = estado_sistema_aforo.get("metrics_history", [])
-    if historial:
-        flujos_previos = [m.get("flujo_por_minuto", 0) for m in historial[-10:]]
-        flujo_suavizado = (sum(flujos_previos) + flujo_por_minuto) / (len(flujos_previos) + 1)
-        flujo_por_minuto = flujo_suavizado
+        flow_per_minute = 0.0
 
-    # A) Diagnóstico de Tasa de Marcha (Volumen de tráfico ajustado)
-    if flujo_por_minuto > 40: 
-        velocidad_marcha = "FLUJO ALTO"
-    elif flujo_por_minuto > 15: 
-        velocidad_marcha = "FLUJO MODERADO"
-    elif flujo_por_minuto > 0: 
-        velocidad_marcha = "FLUJO BAJO"
-    else: 
-        velocidad_marcha = "SIN FLUJO"
-        
-    # TENDENCIA DEL TRÁFICO
-    tendencia = "ESTABLE"
-    if len(historial) > 15:
-        flujo_viejo = sum([m.get("flujo_por_minuto", 0) for m in historial[:5]]) / 5
-        flujo_reciente = sum([m.get("flujo_por_minuto", 0) for m in historial[-5:]]) / 5
-        if flujo_reciente > flujo_viejo * 1.2:
-            tendencia = "AUMENTANDO"
-        elif flujo_reciente < flujo_viejo * 0.8:
-            tendencia = "DISMINUYENDO"
+    # TEMPORAL SMOOTHING: average with the flow of recent frames to avoid sudden jumps.
+    history = traffic_state.get("metrics_history", [])
+    if history:
+        previous_flows = [m.get("flow_per_minute", 0) for m in history[-10:]]
+        smoothed_flow = (sum(previous_flows) + flow_per_minute) / (len(previous_flows) + 1)
+        flow_per_minute = smoothed_flow
 
-    # B) Diagnóstico Cualitativo de la Vía (Umbrales relajados y realistas)
-    if conteo_vehiculos_escena == 0:
-        fluidez_avance = "VIA DESPEJADA"
-    elif porcentaje_interaccion_espacial > 80 and flujo_por_minuto < 3:
-        fluidez_avance = "CONGESTION SEVERA"
-    elif porcentaje_interaccion_espacial > 60 and flujo_por_minuto > 15:
-        fluidez_avance = "TRAFICO DENSO / FLUIDO"
-    elif flujo_por_minuto > 15:
-        fluidez_avance = "FLUJO LIBRE"
+    # A) Flow-rate diagnosis (adjusted traffic volume)
+    if flow_per_minute > 40:
+        flow_level = "HIGH FLOW"
+    elif flow_per_minute > 15:
+        flow_level = "MODERATE FLOW"
+    elif flow_per_minute > 0:
+        flow_level = "LOW FLOW"
     else:
-        fluidez_avance = "TRAFICO MODERADO"
-        
-    metricas_analisis_vial = {
-        "total_vehicles": conteo_vehiculos_escena,
-        "conteo_grupos_activos": conteo_grupos_activos,
-        "interaccion_pct": porcentaje_interaccion_espacial,
-        "velocidad_marcha": velocidad_marcha,
-        "fluidez_avance": fluidez_avance,
-        "flujo_por_minuto": round(flujo_por_minuto, 1),
-        "total_count": estado_sistema_aforo.get("total_count", 0),
-        "tendencia": tendencia,
-        "prev_ids_pos": {} 
+        flow_level = "NO FLOW"
+
+    # TRAFFIC TREND
+    trend = "STABLE"
+    if len(history) > 15:
+        old_flow = sum([m.get("flow_per_minute", 0) for m in history[:5]]) / 5
+        recent_flow = sum([m.get("flow_per_minute", 0) for m in history[-5:]]) / 5
+        if recent_flow > old_flow * 1.2:
+            trend = "INCREASING"
+        elif recent_flow < old_flow * 0.8:
+            trend = "DECREASING"
+
+    # B) Qualitative road diagnosis (relaxed, realistic thresholds)
+    if vehicles_in_scene == 0:
+        flow_state = "CLEAR ROAD"
+    elif spatial_interaction_pct > 80 and flow_per_minute < 3:
+        flow_state = "SEVERE CONGESTION"
+    elif spatial_interaction_pct > 60 and flow_per_minute > 15:
+        flow_state = "DENSE / FLUID TRAFFIC"
+    elif flow_per_minute > 15:
+        flow_state = "FREE FLOW"
+    else:
+        flow_state = "MODERATE TRAFFIC"
+
+    traffic_metrics = {
+        "total_vehicles": vehicles_in_scene,
+        "active_cluster_count": active_cluster_count,
+        "spatial_interaction_pct": spatial_interaction_pct,
+        "flow_level": flow_level,
+        "flow_state": flow_state,
+        "flow_per_minute": round(flow_per_minute, 1),
+        "total_count": traffic_state.get("total_count", 0),
+        "trend": trend,
+        "prev_ids_pos": {}
     }
-    
-    # 4. MONITOREO DE EMBOTELLAMIENTOS Y GRUPOS DE RIESGO
-    metricas_congestiones = []
-    alerta_activa = False
-            
-    for i, (nombre_base, vehiculos_en_grupo) in enumerate(grupos_espaciales_activos.items()):
-        conteo_grupo = len(vehiculos_en_grupo)
-        densidad_grupo = (conteo_grupo / conteo_vehiculos_escena * 100) if conteo_vehiculos_escena > 0 else 0
-        
-        # Riesgo más inteligente: requiere 4+ autos y flujo bajísimo para ser "Embotellamiento"
-        if flujo_por_minuto < 3.0 and conteo_grupo >= 4:
-            riesgo = "ALTO"
-            nombre_final = "Embotellamiento"
-            alerta_activa = True
-        elif conteo_grupo >= 3 and flujo_por_minuto < 10.0:
-            riesgo = "MEDIO"
-            nombre_final = "Trafico Lento"
+
+    # 4. CONGESTION AND RISK-GROUP MONITORING
+    cluster_metrics = []
+    congestion_alert = False
+
+    for vehicles_in_group in active_spatial_clusters.values():
+        group_count = len(vehicles_in_group)
+        group_density = (group_count / vehicles_in_scene * 100) if vehicles_in_scene > 0 else 0
+
+        # Smarter risk: requires 4+ vehicles and very low flow to be a "jam".
+        if flow_per_minute < 3.0 and group_count >= 4:
+            risk = "HIGH"
+            final_name = "Traffic Jam"
+            congestion_alert = True
+        elif group_count >= 3 and flow_per_minute < 10.0:
+            risk = "MEDIUM"
+            final_name = "Slow Traffic"
         else:
-            riesgo = "BAJO"
-            nombre_final = "Peloton en Movimiento"
-            
-        metricas_congestiones.append({
-            "nombre": nombre_final,
-            "conteo": conteo_grupo,
-            "densidad_pct": densidad_grupo,
-            "riesgo": riesgo,
-            "velocidad": round(flujo_por_minuto, 1),
-            "ids": vehiculos_en_grupo
+            risk = "LOW"
+            final_name = "Moving Platoon"
+
+        cluster_metrics.append({
+            "name": final_name,
+            "count": group_count,
+            "density_pct": group_density,
+            "risk": risk,
+            "speed": round(flow_per_minute, 1),
+            "ids": vehicles_in_group
         })
-        
-    metricas_analisis_vial["cluster_metrics"] = metricas_congestiones
-    metricas_analisis_vial["alerta_embotellamiento"] = alerta_activa
-    
-    return metricas_analisis_vial
 
+    traffic_metrics["cluster_metrics"] = cluster_metrics
+    traffic_metrics["congestion_alert"] = congestion_alert
 
-
-
-
+    return traffic_metrics
