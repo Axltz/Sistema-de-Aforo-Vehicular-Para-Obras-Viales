@@ -24,18 +24,25 @@ echo "============================================================"
 echo "  Roadwork Vehicle Traffic Monitoring System"
 echo "============================================================"
 
-if [ ! -x ".venv/bin/python" ]; then
-  echo "[1/3] Creating the Python environment in .venv ..."
-  "$PY" -m venv .venv
+if [ -x "venv/bin/python" ]; then
+  VENV_DIR=venv
+else
+  VENV_DIR=.venv
 fi
 
-VENV_PY=".venv/bin/python"
+if [ ! -x "$VENV_DIR/bin/python" ]; then
+  echo "[1/3] Creating the Python environment in .venv ..."
+  "$PY" -m venv .venv
+  VENV_DIR=.venv
+fi
 
-if [ ! -f ".venv/.deps-installed" ]; then
+VENV_PY="$VENV_DIR/bin/python"
+
+if [ ! -f "$VENV_DIR/.deps-installed" ]; then
   echo "[2/3] Installing dependencies. The first run can take several minutes..."
   "$VENV_PY" -m pip install --upgrade pip
   "$VENV_PY" -m pip install -r requirements-portable.txt
-  touch .venv/.deps-installed
+  touch "$VENV_DIR/.deps-installed"
 fi
 
 echo "[3/3] Starting..."
@@ -50,6 +57,7 @@ case "${1:-}" in
     exec "$VENV_PY" -m src.app
     ;;
   test)
+    "$VENV_PY" -m pytest --version >/dev/null 2>&1 || "$VENV_PY" -m pip install -q pytest
     exec "$VENV_PY" -m pytest -q
     ;;
   *)

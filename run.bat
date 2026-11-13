@@ -27,9 +27,12 @@ if not defined PY (
 )
 
 REM ---------------------------------------------------------------
-REM 2. Create the isolated environment (only the first time)
+REM 2. Reuse an existing venv, or create .venv on first run
 REM ---------------------------------------------------------------
-if not exist ".venv\Scripts\python.exe" (
+set "VENV_DIR=.venv"
+if exist "venv\Scripts\python.exe" set "VENV_DIR=venv"
+
+if not exist "%VENV_DIR%\Scripts\python.exe" (
   echo [1/3] Creating the Python environment in .venv ...
   %PY% -m venv .venv
   if errorlevel 1 (
@@ -37,14 +40,15 @@ if not exist ".venv\Scripts\python.exe" (
     pause
     exit /b 1
   )
+  set "VENV_DIR=.venv"
 )
 
-set "VENV_PY=.venv\Scripts\python.exe"
+set "VENV_PY=%VENV_DIR%\Scripts\python.exe"
 
 REM ---------------------------------------------------------------
 REM 3. Install dependencies (only the first time)
 REM ---------------------------------------------------------------
-if not exist ".venv\.deps-installed" (
+if not exist "%VENV_DIR%\.deps-installed" (
   echo [2/3] Installing dependencies. The first run can take several minutes...
   "%VENV_PY%" -m pip install --upgrade pip >nul 2>nul
   "%VENV_PY%" -m pip install -r requirements-portable.txt
@@ -55,7 +59,7 @@ if not exist ".venv\.deps-installed" (
     pause
     exit /b 1
   )
-  echo ok> ".venv\.deps-installed"
+  echo ok> "%VENV_DIR%\.deps-installed"
 )
 
 echo [3/3] Starting...
@@ -84,6 +88,7 @@ goto end
 goto end
 
 :test
+"%VENV_PY%" -m pytest --version >nul 2>nul || "%VENV_PY%" -m pip install -q pytest
 "%VENV_PY%" -m pytest -q
 goto end
 
