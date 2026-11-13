@@ -222,7 +222,7 @@ Huffman coding is implemented in-house with the standard library (`heapq`,
 
 ```bash
 # 1. Clone the repository
-git clone <your-repository-url>
+git clone https://github.com/Axltz/roadwork-vehicle-traffic-monitoring
 cd sistema-aforo-vehicular-obras-viales
 
 # 2. Create and activate a virtual environment
