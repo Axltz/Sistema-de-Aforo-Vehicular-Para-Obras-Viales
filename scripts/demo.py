@@ -209,8 +209,8 @@ def generate_demo(video_path, output_path, max_frames=None, scale=1.0,
     if writer is not None:
         writer.release()
 
+    dashboard_path = output_path.parent / f"{output_path.stem}_dashboard.png"
     if last_dashboard is not None:
-        dashboard_path = output_path.parent / "dashboard.png"
         cv2.imwrite(str(dashboard_path), last_dashboard)
     else:
         dashboard_path = None
@@ -237,7 +237,7 @@ def generate_demo(video_path, output_path, max_frames=None, scale=1.0,
         "dashboard_image": str(dashboard_path) if dashboard_path else None,
     }
 
-    summary_path = output_path.parent / "demo_summary.json"
+    summary_path = output_path.parent / f"{output_path.stem}_summary.json"
     with open(summary_path, "w", encoding="utf-8") as f:
         json.dump(summary, f, indent=2, ensure_ascii=False, default=_json_default)
 

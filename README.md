@@ -27,7 +27,17 @@ dashboard, and can be exported as JSON or as Huffman-compressed binary reports.
 The repository includes one-command launchers that create an isolated
 environment, install dependencies and start the application.
 
-**Windows** — double-click `run.bat`, or run it from a terminal:
+**Windows — the easiest way: double-click one of these files**
+
+| File | What it does |
+|---|---|
+| **`Start System.bat`** | Opens the desktop application (CustomTkinter) |
+| **`Generate Demo.bat`** | Creates the annotated demo video, no windows |
+
+Both create the environment automatically on first use. You do not need to type
+anything.
+
+**Advanced: `run.bat` from a terminal**
 
 ```bat
 run.bat            REM live CLI (opens two OpenCV windows)
@@ -56,40 +66,51 @@ Press `Q` in the video window to stop the CLI.
 
 ## Demo
 
-[![Dashboard preview](demo/dashboard.png)](demo/demo_trafico1.mp4)
+![Animated preview](demo/images/preview.gif)
 
-▶ **[Watch the annotated demo video](demo/demo_trafico1.mp4)** ·
-**[Raw metrics](demo/demo_summary.json)**
+Three committed runs of the real pipeline. Each video shows the annotated
+traffic view **and** the analytics dashboard side by side. The numbers come from
+the committed `*_summary.json` files, not from estimates.
 
-Generated with `trafico1.mp4`: 332 frames processed, 27 line crossings, final
-state `DENSE / FLUID TRAFFIC` at `18.8 veh/min`. Those numbers come from the
-committed `demo/demo_summary.json`, not from an estimate.
+| Video | Source | Frames | Crossings | Final state |
+|---|---|---|---|---|
+| [`demo_trafico1.mp4`](demo/demo_trafico1.mp4) | `trafico1.mp4` | 332 | 27 | DENSE / FLUID TRAFFIC · 19.4 veh/min · 11 in scene |
+| [`demo_trafico2.mp4`](demo/demo_trafico2.mp4) | `trafico2.mp4` | 300 | 7 | MODERATE TRAFFIC · 4.9 veh/min · 3 in scene |
+| [`demo_trafico3.mp4`](demo/demo_trafico3.mp4) | `trafico3.mp4` | 120 | 3 | MODERATE TRAFFIC · 3.4 veh/min · 6 in scene |
+
+### Screenshots
+
+| Calibration | Detection and clusters |
+|---|---|
+| ![Calibration](demo/images/01_calibration.png) | ![Detection](demo/images/02_detections.png) |
+
+| Full frame | Dashboard panel |
+|---|---|
+| ![Final frame](demo/images/03_final_dashboard.png) | ![Dashboard](demo/images/04_dashboard_panel.png) |
+
+### Generating the demos
 
 `scripts/demo.py` runs the real pipeline headlessly and writes an annotated MP4
 (the video with overlays plus the analytics dashboard side by side) and a JSON
 summary. It does not open windows, so it also works over SSH, in a container or
-on a machine without a display — useful for sharing results.
+on a machine without a display.
 
 ```bash
 python -m scripts.demo
 # or with the launcher:
 ./run.sh demo
+# or on Windows: double-click "Generate Demo.bat"
 ```
 
 By default it processes up to 450 frames of `data/videos/trafico1.mp4` and
-writes:
-
-| File | Content |
-|---|---|
-| `demo/demo_trafico1.mp4` | Video + dashboard: detections, IDs, cluster labels, counting line, live metrics |
-| `demo/demo_summary.json` | Calibration result, crossings and final metrics |
-| `demo/dashboard.png` | Last dashboard frame |
+writes `<name>.mp4`, `<name>_summary.json` and `<name>_dashboard.png` into
+`demo/`.
 
 Flags:
 
 ```bash
-# Process another video, fewer frames, smaller output
-python -m scripts.demo --video data/videos/trafico2.mp4 --max-frames 300 --scale 0.8
+# Another video, fewer frames, smaller output
+python -m scripts.demo --video data/videos/trafico2.mp4 --max-frames 300 --scale 0.7
 
 # Process the whole video
 python -m scripts.demo --max-frames 0
@@ -98,7 +119,14 @@ python -m scripts.demo --max-frames 0
 python -m scripts.demo --no-dashboard
 ```
 
-The `demo/` files are committed as an example output; running the command again
+The stills and the animated GIF are built from a demo video with:
+
+```bash
+python -m scripts.gallery
+# writes demo/images/*.png and demo/images/preview.gif
+```
+
+The `demo/` files are committed as example output; running the commands again
 overwrites them.
 
 ---
@@ -268,11 +296,17 @@ Huffman coding is implemented in-house with the standard library (`heapq`,
 │   └── visualization/
 │       └── overlay.py          # video overlay + dashboard
 ├── scripts/
-│   └── demo.py                 # headless demo video generator
+│   ├── demo.py                 # headless demo video generator
+│   └── gallery.py              # stills + GIF from a demo video
 ├── tests/
 │   ├── test_huffman.py
 │   ├── test_metrics.py
 │   └── test_graphs.py
+├── demo/
+│   ├── demo_trafico1.mp4       # committed example runs (video + dashboard)
+│   ├── demo_trafico2.mp4
+│   ├── demo_trafico3.mp4
+│   └── images/                 # stills + animated preview
 ├── data/
 │   ├── videos/                 # sample input videos
 │   ├── json/                   # exported reports (generated)
@@ -281,6 +315,8 @@ Huffman coding is implemented in-house with the standard library (`heapq`,
 │   └── yolo26n.pt              # YOLO weights (expected at this path)
 ├── docs/
 │   └── ARCHITECTURE.md
+├── Start System.bat            # double-click: desktop application
+├── Generate Demo.bat           # double-click: demo video generator
 ├── run.bat                     # Windows one-click launcher
 ├── run.sh                      # Linux / macOS launcher
 ├── Dockerfile

@@ -172,6 +172,10 @@ entry points into a shared loop function. Keeping the change additive avoided
 risking the behavior of the GUI and CLI in the same step; extracting a shared
 `process_stream()` would be the natural follow-up refactor.
 
+`scripts/gallery.py` extracts stills and a short GIF from a generated demo
+video, so the README can show the system without shipping more binaries than
+necessary.
+
 ---
 
 ## 9. Known Limitations
