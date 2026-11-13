@@ -2,6 +2,9 @@
 # Project-specific ignores
 # ==============================================================================
 
+# Local-only study/interview notes (never commit)
+STUDY_AND_INTERVIEW_GUIDE.md
+
 # Environment variables / secrets (never commit the real .env)
 .env
 .env.*
