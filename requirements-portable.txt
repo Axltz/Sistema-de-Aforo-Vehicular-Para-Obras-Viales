@@ -1,0 +1,19 @@
+# ==============================================================================
+# PORTABLE REQUIREMENTS (unpinned)
+# ==============================================================================
+# Used by the one-click launchers (run.bat / run.sh) so the project can be
+# installed on any modern Python (3.9+), not only the exact Python 3.11 used by
+# Docker and CI.
+#
+# `requirements.txt` keeps exact pins for reproducible builds in Docker/CI.
+# This file intentionally allows newer compatible versions.
+# ==============================================================================
+
+ultralytics>=8.1.0
+opencv-python>=4.9.0.80
+numpy>=1.26.4
+scikit-learn>=1.4.1
+customtkinter>=5.2.2
+matplotlib>=3.8.3
+Pillow>=10.2.0
+python-dotenv>=1.0.1

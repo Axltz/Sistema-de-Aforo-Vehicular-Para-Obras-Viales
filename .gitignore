@@ -19,6 +19,9 @@ data/metrics_live.json
 data/json/
 data/logs/
 
+# Generated demo artifacts (recreated by: python -m scripts.demo)
+demo/
+
 # ==============================================================================
 # Python (standard template)
 # ==============================================================================

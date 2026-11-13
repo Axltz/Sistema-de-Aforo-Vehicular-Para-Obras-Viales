@@ -151,7 +151,30 @@ any GUI, so they run deterministically in CI without a display.
 
 ---
 
-## 8. Known Limitations
+## 8. Portable Execution and Headless Demo
+
+Two additions make the project usable without manual Python setup:
+
+- **`run.bat` / `run.sh`** create a local `.venv` on first use, install
+  `requirements-portable.txt` (unpinned versions) and dispatch to a mode:
+  CLI, GUI, demo or tests. `requirements.txt` keeps the exact pins used by
+  Docker and CI, so reproducibility is preserved where it matters.
+- **`scripts/demo.py`** reuses the same functions as `src/main.py`
+  (`frame_detection`, `calibrate_system`, `count_vehicles`, `process_frame`,
+  `draw_overlay`) but writes frames to a `cv2.VideoWriter` instead of calling
+  `cv2.imshow`. Because it never opens a window, it runs headless (SSH,
+  containers, CI). The annotated ROI is pasted back into the full frame so the
+  output keeps a constant resolution, and a JSON summary records the
+  calibration result and final metrics.
+
+The demo intentionally duplicates the frame loop instead of refactoring the
+entry points into a shared loop function. Keeping the change additive avoided
+risking the behavior of the GUI and CLI in the same step; extracting a shared
+`process_stream()` would be the natural follow-up refactor.
+
+---
+
+## 9. Known Limitations
 
 - Counting is directional, not simultaneous two-way counting.
 - No performance or accuracy benchmarks are included.

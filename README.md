@@ -22,6 +22,73 @@ dashboard, and can be exported as JSON or as Huffman-compressed binary reports.
 
 ---
 
+## Quick Start (no Python knowledge required)
+
+The repository includes one-command launchers that create an isolated
+environment, install dependencies and start the application.
+
+**Windows** — double-click `run.bat`, or run it from a terminal:
+
+```bat
+run.bat            REM live CLI (opens two OpenCV windows)
+run.bat gui        REM CustomTkinter desktop app
+run.bat demo       REM writes an annotated demo video, no windows
+run.bat test       REM runs the unit tests
+```
+
+**Linux / macOS**:
+
+```bash
+./run.sh           # live CLI
+./run.sh gui       # desktop GUI
+./run.sh demo      # annotated demo video
+./run.sh test      # unit tests
+```
+
+The first run creates a `.venv/` folder and installs dependencies from
+`requirements-portable.txt` (unpinned, compatible with any Python 3.9+). Later
+runs start immediately. `requirements.txt` keeps the exact pins used by Docker
+and CI.
+
+Press `Q` in the video window to stop the CLI.
+
+---
+
+## Demo
+
+`scripts/demo.py` runs the real pipeline headlessly and writes an annotated MP4
+plus a JSON summary. It does not open windows, so it also works over SSH, in a
+container or on a machine without a display — useful for sharing results.
+
+```bash
+python -m scripts.demo
+# or with the launcher:
+./run.sh demo
+```
+
+By default it processes up to 450 frames of `data/videos/trafico1.mp4` and
+writes:
+
+| File | Content |
+|---|---|
+| `demo/demo_trafico1.mp4` | Annotated video: detections, IDs, cluster labels, counting line |
+| `demo/demo_summary.json` | Calibration result, crossings and final metrics |
+| `demo/dashboard.png` | Last dashboard frame |
+
+Flags:
+
+```bash
+# Process another video, fewer frames, smaller output
+python -m scripts.demo --video data/videos/trafico2.mp4 --max-frames 300 --scale 0.8
+
+# Process the whole video
+python -m scripts.demo --max-frames 0
+```
+
+Generated demo files are excluded from version control (see `.gitignore`).
+
+---
+
 ## Problem It Solves
 
 Roadworks and temporary work zones change traffic flow and create bottlenecks.
@@ -186,6 +253,8 @@ Huffman coding is implemented in-house with the standard library (`heapq`,
 │   │   └── json_writer.py      # live snapshot, JSONL and JSON export
 │   └── visualization/
 │       └── overlay.py          # video overlay + dashboard
+├── scripts/
+│   └── demo.py                 # headless demo video generator
 ├── tests/
 │   ├── test_huffman.py
 │   ├── test_metrics.py
@@ -198,12 +267,15 @@ Huffman coding is implemented in-house with the standard library (`heapq`,
 │   └── yolo26n.pt              # YOLO weights (expected at this path)
 ├── docs/
 │   └── ARCHITECTURE.md
+├── run.bat                     # Windows one-click launcher
+├── run.sh                      # Linux / macOS launcher
 ├── Dockerfile
 ├── .dockerignore
 ├── .env.example
 ├── .flake8
 ├── pytest.ini
 ├── requirements.txt
+├── requirements-portable.txt
 ├── requirements-dev.txt
 └── .github/workflows/ci.yml
 ```
@@ -214,11 +286,15 @@ Huffman coding is implemented in-house with the standard library (`heapq`,
 
 ### Prerequisites
 
-- Python 3.11 (the version used by Docker and CI).
+- Python 3.9+ (3.11 is the version used by Docker and CI; newer versions work
+  through `requirements-portable.txt`).
 - A video file (sample clips are in `data/videos/`) or a webcam.
 - Optional: Docker, for the container workflow.
 
 ### Local Setup
+
+> If you just want to run the project, use the [Quick Start](#quick-start-no-python-knowledge-required)
+> launchers instead. The steps below describe the manual setup.
 
 ```bash
 # 1. Clone the repository
@@ -293,6 +369,15 @@ CLI keyboard controls:
 
 - `Q` – quit.
 - `E` – export a Huffman-compressed report for the current metrics.
+
+### Demo video (headless)
+
+```bash
+python -m scripts.demo
+```
+
+Runs the same pipeline without opening windows and writes the annotated video
+and a JSON summary to `demo/`. See [Demo](#demo) for details and flags.
 
 ---
 
