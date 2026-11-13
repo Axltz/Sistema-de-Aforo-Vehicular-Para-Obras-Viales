@@ -14,6 +14,7 @@ from pathlib import Path
 import cv2
 from PIL import Image
 
+from scripts.layout import panel_crop
 from src.config import BASE_DIR
 
 
@@ -24,10 +25,8 @@ def _read_frame(cap, index):
 
 
 def _right_panel(frame):
-    """Crop the analytics panel (400x700 at native size) from a composed frame."""
-    height, width = frame.shape[:2]
-    panel_width = round(400 * height / 700)
-    return frame[:, max(0, width - panel_width):]
+    """Crop the metrics panel from a GUI-style demo frame."""
+    return panel_crop(frame)
 
 
 def build_gallery(video_path, outdir, calibration_frame=10, gif_seconds=4,
@@ -49,7 +48,7 @@ def build_gallery(video_path, outdir, calibration_frame=10, gif_seconds=4,
     stills = {
         "01_calibration.png": calibration_frame,
         "02_detections.png": middle,
-        "03_final_dashboard.png": last,
+        "03_final_frame.png": last,
     }
 
     written = []
@@ -63,7 +62,7 @@ def build_gallery(video_path, outdir, calibration_frame=10, gif_seconds=4,
 
     final_frame = _read_frame(cap, last)
     if final_frame is not None:
-        path = outdir / "04_dashboard_panel.png"
+        path = outdir / "04_metrics_panel.png"
         cv2.imwrite(str(path), _right_panel(final_frame))
         written.append(path)
 

@@ -1,12 +1,13 @@
 """Headless demo generator.
 
-Runs the real detection + analytics pipeline on a video and writes an
-annotated MP4 plus a JSON summary. It opens no windows, so it works on any
-machine (including a Docker container or a remote server).
+Runs the real detection + analytics pipeline on a video and writes a demo
+recording laid out like the desktop app (video, live flow chart and metrics
+panel). It opens no windows, so it works on any machine, including a container
+or a remote server.
 
 Usage:
     python -m scripts.demo
-    python -m scripts.demo --video data/videos/trafico2.mp4 --max-frames 450
+    python -m scripts.demo --video data/videos/trafico2.mp4 --max-frames 300
 """
 
 import argparse
@@ -17,6 +18,7 @@ from pathlib import Path
 import cv2
 import numpy as np
 
+from scripts.layout import render_gui_frame
 from src.analytics.processing import (
     calibrate_system,
     count_vehicles,
@@ -63,35 +65,6 @@ def _json_default(value):
     return str(value)
 
 
-def _compose_frame(main, dashboard):
-    """Place the annotated video and the analytics dashboard side by side."""
-    main_h, main_w = main.shape[:2]
-
-    if dashboard is None:
-        dashboard = np.full((700, 400, 3), 30, dtype=np.uint8)
-        cv2.putText(
-            dashboard, "WAITING FOR", (45, 330),
-            cv2.FONT_HERSHEY_SIMPLEX, 0.8, (150, 150, 150), 2,
-        )
-        cv2.putText(
-            dashboard, "CALIBRATION", (45, 370),
-            cv2.FONT_HERSHEY_SIMPLEX, 0.8, (150, 150, 150), 2,
-        )
-
-    panel_h, panel_w = dashboard.shape[:2]
-    gap = 8
-    canvas_h = max(main_h, panel_h)
-
-    canvas = np.full((canvas_h, main_w + gap + panel_w, 3), 18, dtype=np.uint8)
-    y_main = (canvas_h - main_h) // 2
-    canvas[y_main:y_main + main_h, 0:main_w] = main
-    canvas[0:panel_h, main_w + gap:main_w + gap + panel_w] = dashboard
-    cv2.line(canvas, (main_w + gap // 2, 0),
-             (main_w + gap // 2, canvas_h), (70, 70, 70), 1)
-
-    return canvas
-
-
 def _open_writer(path, frame_size, fps):
     fourcc = cv2.VideoWriter_fourcc(*"mp4v")
     writer = cv2.VideoWriter(str(path), fourcc, fps, frame_size)
@@ -104,7 +77,7 @@ def _open_writer(path, frame_size, fps):
 
 
 def generate_demo(video_path, output_path, max_frames=None, scale=1.0,
-                  show_dashboard=True):
+                  video_only=False):
     video_path = Path(video_path)
     output_path = Path(output_path)
     output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -121,8 +94,11 @@ def generate_demo(video_path, output_path, max_frames=None, scale=1.0,
     writer = None
     frame_count = 0
     last_result = None
-    last_dashboard = None
+    last_composed = None
     calibration_locked = False
+    flow_history = []
+    console_lines = []
+    started_at = datetime.now()
 
     print(f"Source : {video_path}")
     print(f"Output : {output_path}")
@@ -158,7 +134,8 @@ def generate_demo(video_path, output_path, max_frames=None, scale=1.0,
                 (0, 255, 255),
                 2,
             )
-            output_frame = frame
+            display_frame = frame
+            metrics = None
         else:
             calibration_locked = True
             roi = state["active_roi"]
@@ -173,18 +150,34 @@ def generate_demo(video_path, output_path, max_frames=None, scale=1.0,
                 last_result = process_frame(detections, cropped.shape, state)
                 last_result["metrics"]["total_count"] = total_count
 
-            annotated, dashboard = draw_overlay(
-                cropped.copy(), detections, last_result
+                flow = last_result["metrics"].get("flow_per_minute", 0.0)
+                flow_history.append(flow)
+                if len(flow_history) > 100:
+                    flow_history.pop(0)
+
+                elapsed = (datetime.now() - started_at).total_seconds()
+                console_lines.append(
+                    f"t={elapsed:6.1f}s  n={total_count}  flow={flow:.1f}"
+                )
+                if len(console_lines) > 6:
+                    console_lines.pop(0)
+
+            metrics = last_result["metrics"] if last_result else None
+
+            annotated = draw_overlay(cropped, detections, last_result)
+
+            # Paste the annotated ROI back into the full frame so the demo
+            # keeps a constant resolution during the whole clip.
+            display_frame = frame.copy()
+            display_frame[roi["y1"]:roi["y2"], roi["x1"]:roi["x2"]] = annotated
+
+        if video_only:
+            output_frame = display_frame
+        else:
+            output_frame = render_gui_frame(
+                display_frame, metrics, flow_history, console_lines
             )
-            last_dashboard = dashboard
-
-            # Paste the annotated ROI back into the full frame so the output
-            # video keeps a constant resolution during the whole clip.
-            output_frame = frame.copy()
-            output_frame[roi["y1"]:roi["y2"], roi["x1"]:roi["x2"]] = annotated
-
-        if show_dashboard:
-            output_frame = _compose_frame(output_frame, last_dashboard)
+            last_composed = output_frame.copy()
 
         if scale != 1.0:
             new_size = (
@@ -209,11 +202,11 @@ def generate_demo(video_path, output_path, max_frames=None, scale=1.0,
     if writer is not None:
         writer.release()
 
-    dashboard_path = output_path.parent / f"{output_path.stem}_dashboard.png"
-    if last_dashboard is not None:
-        cv2.imwrite(str(dashboard_path), last_dashboard)
+    frame_path = output_path.parent / f"{output_path.stem}_frame.png"
+    if last_composed is not None:
+        cv2.imwrite(str(frame_path), last_composed)
     else:
-        dashboard_path = None
+        frame_path = None
 
     summary = {
         "generated_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
@@ -234,7 +227,7 @@ def generate_demo(video_path, output_path, max_frames=None, scale=1.0,
         },
         "total_count": state["total_count"],
         "final_metrics": last_result["metrics"] if last_result else None,
-        "dashboard_image": str(dashboard_path) if dashboard_path else None,
+        "frame_image": str(frame_path) if frame_path else None,
     }
 
     summary_path = output_path.parent / f"{output_path.stem}_summary.json"
@@ -247,8 +240,8 @@ def generate_demo(video_path, output_path, max_frames=None, scale=1.0,
     print("=" * 60)
     print(f" Video      : {output_path}")
     print(f" Summary    : {summary_path}")
-    if dashboard_path:
-        print(f" Dashboard  : {dashboard_path}")
+    if frame_path:
+        print(f" Frame      : {frame_path}")
     print(f" Frames     : {frame_count}")
     print(f" Calibrated : {calibration_locked} "
           f"(orientation={state['orientation']}, direction={state['flow_direction']})")
@@ -268,7 +261,7 @@ def generate_demo(video_path, output_path, max_frames=None, scale=1.0,
 
 def parse_args(argv=None):
     parser = argparse.ArgumentParser(
-        description="Generate an annotated demo video (headless, no windows)."
+        description="Generate a demo recording of the system (headless)."
     )
     parser.add_argument(
         "--video",
@@ -293,9 +286,9 @@ def parse_args(argv=None):
         help="Output scale factor, e.g. 0.75 for a smaller file (default: 1.0)",
     )
     parser.add_argument(
-        "--no-dashboard",
+        "--video-only",
         action="store_true",
-        help="Only render the annotated video, without the analytics panel",
+        help="Only render the annotated video, without the GUI layout",
     )
     return parser.parse_args(argv)
 
@@ -321,7 +314,7 @@ def main(argv=None):
         output,
         max_frames=max_frames,
         scale=args.scale,
-        show_dashboard=not args.no_dashboard,
+        video_only=args.video_only,
     )
 
 

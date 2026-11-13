@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-12 19:59:58",
+  "generated_at": "2026-11-12 20:34:38",
   "source_video": "C:\\Universidad\\5to Semestre\\sistema-aforo-vehicular-obras-viales\\data\\videos\\trafico2.mp4",
   "output_video": "C:\\Universidad\\5to Semestre\\sistema-aforo-vehicular-obras-viales\\demo\\demo_trafico2.mp4",
   "frames_processed": 300,
@@ -33,12 +33,12 @@
     "spatial_interaction_pct": 15.0,
     "flow_level": "LOW FLOW",
     "flow_state": "MODERATE TRAFFIC",
-    "flow_per_minute": 4.9,
+    "flow_per_minute": 4.8,
     "total_count": 7,
     "trend": "INCREASING",
     "prev_ids_pos": {},
     "cluster_metrics": [],
     "congestion_alert": false
   },
-  "dashboard_image": "C:\\Universidad\\5to Semestre\\sistema-aforo-vehicular-obras-viales\\demo\\demo_trafico2_dashboard.png"
+  "frame_image": "C:\\Universidad\\5to Semestre\\sistema-aforo-vehicular-obras-viales\\demo\\demo_trafico2_frame.png"
 }

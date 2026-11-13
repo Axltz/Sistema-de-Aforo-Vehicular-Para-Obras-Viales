@@ -3,54 +3,12 @@ import numpy as np
 
 
 def draw_overlay(frame, detections, analysis_result):
-    height, width = frame.shape[:2]
-    dashboard = np.zeros((700, 400, 3), dtype=np.uint8) + 30
+    """Draw the counting line, cluster labels and vehicle HUD on the frame.
+
+    The metrics dashboard is no longer rendered here: the GUI has its own
+    analytics panel, and the demo renders a GUI-style layout around the frame.
+    """
     metrics = analysis_result["metrics"]
-
-    def dashboard_text(target, text, x, y, color=(255, 255, 255), scale=0.6, thickness=1):
-        cv2.putText(target, str(text), (x, y), cv2.FONT_HERSHEY_SIMPLEX, scale, color, thickness)
-
-    # HEADER
-    cv2.rectangle(dashboard, (0, 0), (400, 60), (50, 50, 50), -1)
-    dashboard_text(dashboard, "PROFESSIONAL TRAFFIC MONITOR", 20, 40, (0, 255, 255), 0.7, 2)
-
-    y_pos = 100
-    # SECTION 1: COUNT AND FLOW
-    dashboard_text(dashboard, "FLOW STATISTICS", 20, y_pos, (200, 200, 200), 0.5); y_pos += 30
-    dashboard_text(dashboard, f"Vehicles on screen: {metrics.get('total_vehicles', 0)}", 20, y_pos, (255, 255, 255), 0.6, 1); y_pos += 30
-    dashboard_text(dashboard, f"Vehicles that crossed: {metrics['total_count']}", 20, y_pos, (0, 255, 0), 0.6, 2); y_pos += 30
-    dashboard_text(dashboard, f"Current rate: {metrics.get('flow_per_minute', 0)} vehs/min", 20, y_pos, (255, 255, 0), 0.6, 2); y_pos += 50
-
-    # SECTION 2: ROAD DIAGNOSIS
-    dashboard_text(dashboard, "OVERALL TRAFFIC STATE", 20, y_pos, (200, 200, 200), 0.5); y_pos += 30
-    dashboard_text(dashboard, f"{metrics['flow_state']}", 20, y_pos, (255, 255, 255), 0.65, 2); y_pos += 30
-    dashboard_text(dashboard, f"Behavior: {metrics['flow_level']}", 20, y_pos, (150, 150, 150), 0.5, 1); y_pos += 50
-
-    # SECTION 3: ROAD EVENTS (Clusters and Congestion)
-    dashboard_text(dashboard, "EVENTS AND CLUSTERS MONITOR", 20, y_pos, (200, 200, 200), 0.5); y_pos += 30
-
-    if metrics.get("congestion_alert"):
-        # Blinking visual alert
-        alert_color = (0, 0, 255) if int(cv2.getTickCount() / cv2.getTickFrequency() * 2) % 2 == 0 else (0, 100, 255)
-        cv2.rectangle(dashboard, (10, y_pos - 20), (390, y_pos + 10), alert_color, -1)
-        dashboard_text(dashboard, "TRAFFIC JAM DETECTED!", 60, y_pos, (255, 255, 255), 0.6, 2)
-    y_pos += 30
-
-    cluster_metrics = metrics.get("cluster_metrics", [])
-    if not cluster_metrics:
-        dashboard_text(dashboard, "No risk clusters.", 20, y_pos, (0, 255, 0), 0.5); y_pos += 25
-    else:
-        for i, cluster_data in enumerate(cluster_metrics):
-            cluster_name = cluster_data["name"]
-            cluster_color = [(255, 100, 0), (0, 150, 255), (100, 0, 255), (0, 255, 150)][i % 4]
-            # Format: "Vehicle Group: 4 vehs - Moving"
-            status_text = "Stopped (HIGH risk)" if cluster_data['risk'] == "HIGH" else "Moving"
-            dashboard_text(dashboard, f"{cluster_name}: {cluster_data['count']} vehs - {status_text}", 20, y_pos, cluster_color, 0.45, 1); y_pos += 25
-
-    # SYSTEM CONTROLS (footer)
-    cv2.putText(dashboard, "CONTROLS:", (20, 640), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (150, 150, 150), 1)
-    cv2.putText(dashboard, "[E] Export JSON", (20, 665), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (100, 255, 100), 1)
-    cv2.putText(dashboard, "[Q] Quit System", (20, 685), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (100, 100, 255), 1)
 
     # MAIN VIDEO VISUALS (Counting Line - Neon Laser Design)
     counting_line = analysis_result["line"]
@@ -75,9 +33,10 @@ def draw_overlay(frame, detections, analysis_result):
     center_positions = {v["id"]: v["center"] for v in detections}
 
     # 2. Draw congestion zones
+    cluster_metrics = metrics.get("cluster_metrics", [])
     vehicles_at_risk = set()
 
-    for i, cluster_data in enumerate(cluster_metrics):
+    for cluster_data in cluster_metrics:
         cluster_name = cluster_data["name"]
         vehicle_ids = cluster_data["ids"]
         risk = cluster_data["risk"]
@@ -132,4 +91,4 @@ def draw_overlay(frame, detections, analysis_result):
             cv2.rectangle(frame, (cx - 15, cy - 16), (cx - 15 + w + 6, cy - 16 - h - 4), (255, 255, 0), 1)
             cv2.putText(frame, tag_id, (cx - 12, cy - 18), cv2.FONT_HERSHEY_SIMPLEX, 0.35, (255, 255, 255), 1, cv2.LINE_AA)
 
-    return frame, dashboard
+    return frame

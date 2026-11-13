@@ -41,7 +41,7 @@ storage and presentation layers can evolve independently:
 | `src/analytics/processing.py` | State, calibration, counting and Huffman export |
 | `src/analytics/huffman.py` | Huffman compress/decompress |
 | `src/storage/json_writer.py` | Live snapshot, JSONL history and JSON export |
-| `src/visualization/overlay.py` | Video annotation and dashboard rendering |
+| `src/visualization/overlay.py` | Video annotation: counting line, vehicle HUD and cluster labels |
 | `src/gui.py`, `src/main.py`, `src/app.py` | Presentation and entry points |
 
 Consequences of this split:
@@ -155,10 +155,12 @@ any GUI, so they run deterministically in CI without a display.
 
 Two additions make the project usable without manual Python setup:
 
-- **`run.bat` / `run.sh`** create a local `.venv` on first use, install
-  `requirements-portable.txt` (unpinned versions) and dispatch to a mode:
-  CLI, GUI, demo or tests. `requirements.txt` keeps the exact pins used by
-  Docker and CI, so reproducibility is preserved where it matters.
+- **`run.bat` / `run.sh`** create a local environment on first use (reusing an
+  existing `venv/` when present), install `requirements-portable.txt` (unpinned
+  versions) and dispatch to a mode: CLI, GUI, demo or tests.
+  `requirements.txt` keeps the exact pins used by Docker and CI, so
+  reproducibility is preserved where it matters. `Start System.bat` and
+  `Generate Demo.bat` are double-click wrappers around those modes.
 - **`scripts/demo.py`** reuses the same functions as `src/main.py`
   (`frame_detection`, `calibrate_system`, `count_vehicles`, `process_frame`,
   `draw_overlay`) but writes frames to a `cv2.VideoWriter` instead of calling
@@ -166,6 +168,16 @@ Two additions make the project usable without manual Python setup:
   containers, CI). The annotated ROI is pasted back into the full frame so the
   output keeps a constant resolution, and a JSON summary records the
   calibration result and final metrics.
+- **`scripts/layout.py`** redraws the GUI layout headlessly with OpenCV: the
+  annotated video, a live flow chart built from the metrics history, and the
+  same metric rows used by the CustomTkinter panel. This is a visual
+  reconstruction, not a recording of the Tk window: the real app cannot be
+  captured without a display.
+
+There is a single analytics design: the CustomTkinter panel. `draw_overlay` only
+annotates the video (counting line, vehicle HUD, cluster labels); the CLI no
+longer opens a second dashboard window, and the demo reuses the GUI layout
+instead of rendering a separate panel.
 
 The demo intentionally duplicates the frame loop instead of refactoring the
 entry points into a shared loop function. Keeping the change additive avoided

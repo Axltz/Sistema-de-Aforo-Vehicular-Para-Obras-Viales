@@ -17,8 +17,8 @@ an OpenCV CLI viewer.
 The system runs a continuous frame loop: it captures video (file or webcam),
 runs YOLO detection/tracking, counts vehicles crossing an automatically placed
 virtual line, and periodically computes traffic metrics (flow per minute,
-spatial interaction, congestion risk). Results are drawn over the video and on a
-dashboard, and can be exported as JSON or as Huffman-compressed binary reports.
+spatial interaction, congestion risk). Results are drawn over the video and in the
+desktop analytics panel, and can be exported as JSON or as Huffman-compressed binary reports.
 
 ---
 
@@ -68,15 +68,15 @@ Press `Q` in the video window to stop the CLI.
 
 ![Animated preview](demo/images/preview.gif)
 
-Three committed runs of the real pipeline. Each video shows the annotated
-traffic view **and** the analytics dashboard side by side. The numbers come from
+Three committed runs of the real pipeline. Each video is laid out like the
+desktop app: annotated video, live flow chart and metrics panel. The numbers come from
 the committed `*_summary.json` files, not from estimates.
 
 | Video | Source | Frames | Crossings | Final state |
 |---|---|---|---|---|
-| [`demo_trafico1.mp4`](demo/demo_trafico1.mp4) | `trafico1.mp4` | 332 | 27 | DENSE / FLUID TRAFFIC · 19.4 veh/min · 11 in scene |
-| [`demo_trafico2.mp4`](demo/demo_trafico2.mp4) | `trafico2.mp4` | 300 | 7 | MODERATE TRAFFIC · 4.9 veh/min · 3 in scene |
-| [`demo_trafico3.mp4`](demo/demo_trafico3.mp4) | `trafico3.mp4` | 120 | 3 | MODERATE TRAFFIC · 3.4 veh/min · 6 in scene |
+| [`demo_trafico1.mp4`](demo/demo_trafico1.mp4) | `trafico1.mp4` | 332 | 27 | DENSE / FLUID TRAFFIC · 19.7 veh/min · 11 in scene |
+| [`demo_trafico2.mp4`](demo/demo_trafico2.mp4) | `trafico2.mp4` | 300 | 7 | MODERATE TRAFFIC · 4.8 veh/min · 3 in scene |
+| [`demo_trafico3.mp4`](demo/demo_trafico3.mp4) | `trafico3.mp4` | 120 | 3 | MODERATE TRAFFIC · 2.3 veh/min · 6 in scene |
 
 ### Screenshots
 
@@ -84,14 +84,14 @@ the committed `*_summary.json` files, not from estimates.
 |---|---|
 | ![Calibration](demo/images/01_calibration.png) | ![Detection](demo/images/02_detections.png) |
 
-| Full frame | Dashboard panel |
+| Full frame | Metrics panel |
 |---|---|
-| ![Final frame](demo/images/03_final_dashboard.png) | ![Dashboard](demo/images/04_dashboard_panel.png) |
+| ![Final frame](demo/images/03_final_frame.png) | ![Metrics panel](demo/images/04_metrics_panel.png) |
 
 ### Generating the demos
 
 `scripts/demo.py` runs the real pipeline headlessly and writes an annotated MP4
-(the video with overlays plus the analytics dashboard side by side) and a JSON
+(annotated video, live flow chart and metrics panel) and a JSON
 summary. It does not open windows, so it also works over SSH, in a container or
 on a machine without a display.
 
@@ -103,7 +103,7 @@ python -m scripts.demo
 ```
 
 By default it processes up to 450 frames of `data/videos/trafico1.mp4` and
-writes `<name>.mp4`, `<name>_summary.json` and `<name>_dashboard.png` into
+writes `<name>.mp4`, `<name>_summary.json` and `<name>_frame.png` into
 `demo/`.
 
 Flags:
@@ -116,7 +116,7 @@ python -m scripts.demo --video data/videos/trafico2.mp4 --max-frames 300 --scale
 python -m scripts.demo --max-frames 0
 
 # Video only, without the analytics panel
-python -m scripts.demo --no-dashboard
+python -m scripts.demo --video-only
 ```
 
 The stills and the animated GIF are built from a demo video with:
@@ -170,7 +170,7 @@ This project provides a self-contained, local way to:
   timestamps), spatial interaction percentage, flow level/state, trend,
   per-cluster risk and a congestion alert.
 - **Visualization**: a video overlay (counting line, per-vehicle HUD, cluster
-  labels) plus a dashboard, and a CustomTkinter GUI with a live Matplotlib chart.
+  labels) in the CLI, and a CustomTkinter GUI with a live Matplotlib chart.
 - **JSON export** for a snapshot or the accumulated history.
 - **Custom Huffman compression** of JSON reports into a `.bin` file plus a
   dictionary sidecar, with in-app decompression.
@@ -294,16 +294,17 @@ Huffman coding is implemented in-house with the standard library (`heapq`,
 │   ├── storage/
 │   │   └── json_writer.py      # live snapshot, JSONL and JSON export
 │   └── visualization/
-│       └── overlay.py          # video overlay + dashboard
+│       └── overlay.py          # video annotation (line, HUD, clusters)
 ├── scripts/
 │   ├── demo.py                 # headless demo video generator
-│   └── gallery.py              # stills + GIF from a demo video
+│   ├── gallery.py              # stills + GIF from a demo video
+│   └── layout.py               # GUI-style frame renderer
 ├── tests/
 │   ├── test_huffman.py
 │   ├── test_metrics.py
 │   └── test_graphs.py
 ├── demo/
-│   ├── demo_trafico1.mp4       # committed example runs (video + dashboard)
+│   ├── demo_trafico1.mp4       # committed example runs (GUI layout)
 │   ├── demo_trafico2.mp4
 │   ├── demo_trafico3.mp4
 │   └── images/                 # stills + animated preview
