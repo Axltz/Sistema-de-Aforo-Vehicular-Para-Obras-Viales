@@ -2,7 +2,8 @@ import heapq
 import json
 from collections import Counter
 
-class NodoHuffman:
+
+class HuffmanNode:
     def __init__(self, char, freq):
         self.char = char
         self.freq = freq
@@ -12,59 +13,64 @@ class NodoHuffman:
     def __lt__(self, other):
         return self.freq < other.freq
 
-def construir_arbol_huffman(texto):
-    frecuencias = Counter(texto)
-    heap = [NodoHuffman(char, freq) for char, freq in frecuencias.items()]
+
+def build_huffman_tree(text):
+    frequencies = Counter(text)
+    heap = [HuffmanNode(char, freq) for char, freq in frequencies.items()]
     heapq.heapify(heap)
 
     while len(heap) > 1:
-        nodo_izq = heapq.heappop(heap)
-        nodo_der = heapq.heappop(heap)
-        nodo_padre = NodoHuffman(None, nodo_izq.freq + nodo_der.freq)
-        nodo_padre.left = nodo_izq
-        nodo_padre.right = nodo_der
-        heapq.heappush(heap, nodo_padre)
+        left_node = heapq.heappop(heap)
+        right_node = heapq.heappop(heap)
+        parent_node = HuffmanNode(None, left_node.freq + right_node.freq)
+        parent_node.left = left_node
+        parent_node.right = right_node
+        heapq.heappush(heap, parent_node)
+
     return heap[0] if heap else None
 
-def generar_codigos(nodo, codigo_actual="", codigos=None):
-    if codigos is None:
-        codigos = {}
-    if nodo is not None:
-        if nodo.char is not None:
-            codigos[nodo.char] = codigo_actual
-        generar_codigos(nodo.left, codigo_actual + "0", codigos)
-        generar_codigos(nodo.right, codigo_actual + "1", codigos)
-    return codigos
 
-def comprimir_texto_huffman(texto):
-    if not texto:
+def generate_codes(node, current_code="", codes=None):
+    if codes is None:
+        codes = {}
+    if node is not None:
+        if node.char is not None:
+            codes[node.char] = current_code
+        generate_codes(node.left, current_code + "0", codes)
+        generate_codes(node.right, current_code + "1", codes)
+    return codes
+
+
+def compress_text_huffman(text):
+    if not text:
         return "", {}
-    raiz = construir_arbol_huffman(texto)
-    diccionario_codigos = generar_codigos(raiz)
-    texto_comprimido = "".join([diccionario_codigos[char] for char in texto])
-    return texto_comprimido, diccionario_codigos
+    root = build_huffman_tree(text)
+    code_table = generate_codes(root)
+    compressed_text = "".join([code_table[char] for char in text])
+    return compressed_text, code_table
 
-def descompresor_huffman(ruta_bin, ruta_dict):
-    with open(ruta_dict, "r", encoding="utf-8") as f:
-        codigos = json.load(f)
-    codigos_invertidos = {v: k for k, v in codigos.items()}
-    
-    with open(ruta_bin, "rb") as f:
-        contenido_bytes = f.read()
-    
-    cadena_bits = "".join([f"{byte:08b}" for byte in contenido_bytes])
-        
-    texto_decodificado = ""
-    codigo_actual = ""
-    for bit in cadena_bits:
-        codigo_actual += bit
-        if codigo_actual in codigos_invertidos:
-            texto_decodificado += codigos_invertidos[codigo_actual]
-            codigo_actual = ""
-            
-    # Buscamos dónde está la última llave de cierre '}' del JSON real
-    # para recortar los caracteres extra generados por los bits de relleno
-    fin_json = texto_decodificado.rfind('}') + 1
-    texto_limpio = texto_decodificado[:fin_json]
-            
-    return json.loads(texto_limpio)
+
+def decompress_huffman(bin_path, dict_path):
+    with open(dict_path, "r", encoding="utf-8") as f:
+        codes = json.load(f)
+    reversed_codes = {v: k for k, v in codes.items()}
+
+    with open(bin_path, "rb") as f:
+        byte_content = f.read()
+
+    bit_string = "".join([f"{byte:08b}" for byte in byte_content])
+
+    decoded_text = ""
+    current_code = ""
+    for bit in bit_string:
+        current_code += bit
+        if current_code in reversed_codes:
+            decoded_text += reversed_codes[current_code]
+            current_code = ""
+
+    # Find the last closing '}' of the real JSON to trim the extra characters
+    # produced by the padding bits.
+    json_end = decoded_text.rfind('}') + 1
+    clean_text = decoded_text[:json_end]
+
+    return json.loads(clean_text)

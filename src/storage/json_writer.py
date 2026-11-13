@@ -2,103 +2,103 @@ import json
 import os
 import time
 from datetime import datetime
-from src.config import METRICS_LIVE_PATH, LOGS_DIR
+
+from src.config import LOGS_DIR, METRICS_LIVE_PATH
+
 
 def save_metrics_local(metrics, append_to_log=False):
     """
-    Guarda las métricas en data/metrics_live.json (sobrescrito)
-    y acumula en data/logs/metrics_YYYY-MM-DD.jsonl (historial diario) si append_to_log es True.
-    La estructura de datos es 100% compatible con el formato de Supabase anterior.
+    Saves metrics to data/metrics_live.json (overwritten) and appends to
+    data/logs/metrics_YYYY-MM-DD.jsonl (daily history) when append_to_log is True.
     """
-    # Asegurar que existan los directorios
+    # Ensure the directories exist
     os.makedirs(LOGS_DIR, exist_ok=True)
     if METRICS_LIVE_PATH.parent:
         os.makedirs(METRICS_LIVE_PATH.parent, exist_ok=True)
-        
+
     now = datetime.now()
     ts_iso = now.isoformat()
     msg_id = int(time.time() * 1000)
-    
-    # Estructura unificada compatible con lo que app.js espera
+
     payload = {
         "id": msg_id,
         "ts": ts_iso,
         "total_count": metrics.get("total_count", 0),
         "data": {
             "total_vehicles": metrics.get("total_vehicles", 0),
-            "flujo_por_minuto": metrics.get("flujo_por_minuto", 0.0),
-            "interaccion_pct": metrics.get("interaccion_pct", 0.0),
-            "fluidez_avance": metrics.get("fluidez_avance", "N/A"),
-            "velocidad_marcha": metrics.get("velocidad_marcha", "N/A"),
-            "alerta_embotellamiento": metrics.get("alerta_embotellamiento", False),
+            "flow_per_minute": metrics.get("flow_per_minute", 0.0),
+            "spatial_interaction_pct": metrics.get("spatial_interaction_pct", 0.0),
+            "flow_state": metrics.get("flow_state", "N/A"),
+            "flow_level": metrics.get("flow_level", "N/A"),
+            "congestion_alert": metrics.get("congestion_alert", False),
             "cluster_metrics": []
         }
     }
-    
-    # Mapear los clusters para mantener compatibilidad
+
+    # Map the clusters
     for c in metrics.get("cluster_metrics", []):
         payload["data"]["cluster_metrics"].append({
-            "nombre": c.get("nombre", c.get("name", "")),
-            "conteo": c.get("conteo", c.get("count", 0)),
-            "riesgo": c.get("riesgo", c.get("risk", "BAJO"))
+            "name": c.get("name", ""),
+            "count": c.get("count", 0),
+            "risk": c.get("risk", "LOW")
         })
-        
-    # 1. Guardar/sobrescribir el estado en vivo
+
+    # 1. Save/overwrite the live state
     try:
         with open(METRICS_LIVE_PATH, "w", encoding="utf-8") as f:
             json.dump(payload, f, indent=2, ensure_ascii=False)
     except Exception as e:
-        print(f"⚠️ Error al escribir metrics_live.json: {e}")
-        
-    # 2. Acumular en el log histórico diario (.jsonl) solo si corresponde
+        print(f"⚠️ Error writing metrics_live.json: {e}")
+
+    # 2. Append to the daily history log (.jsonl) only when requested
     if append_to_log:
-        fecha_hoy = now.strftime("%Y-%m-%d")
-        log_file = LOGS_DIR / f"metrics_{fecha_hoy}.jsonl"
-        
+        today_str = now.strftime("%Y-%m-%d")
+        log_file = LOGS_DIR / f"metrics_{today_str}.jsonl"
+
         try:
             with open(log_file, "a", encoding="utf-8") as f:
                 f.write(json.dumps(payload, ensure_ascii=False) + "\n")
         except Exception as e:
-            print(f"⚠️ Error al escribir en el historial jsonl: {e}")
+            print(f"⚠️ Error writing to the jsonl history: {e}")
 
 
 def export_summary_json(data, is_history=False):
     """
-    Exporta un resumen (o historial) con marca de tiempo en el nombre del archivo.
+    Exports a summary (or history) with a timestamp in the filename.
     """
     export_dir = LOGS_DIR.parent / "json"
     os.makedirs(export_dir, exist_ok=True)
-        
+
     now = datetime.now()
-    fecha_hoy = now.strftime("%Y%m%d")
-    fecha_hora = now.strftime("%Y%m%d_%H%M%S")
-    
+    today_str = now.strftime("%Y%m%d")
+    timestamp_str = now.strftime("%Y%m%d_%H%M%S")
+
     if is_history:
-        # data será una lista de registros
-        export_file = export_dir / f"reporte_historial_{fecha_hoy}_{fecha_hora}.json"
-        contenido = {
-            "reporte_generado": now.strftime("%Y-%m-%d %H:%M:%S"),
-            "tipo": "HISTORIAL_COMPLETO",
-            "total_registros": len(data),
-            "registros": data
+        # data is a list of records
+        export_file = export_dir / f"report_history_{today_str}_{timestamp_str}.json"
+        content = {
+            "report_generated": now.strftime("%Y-%m-%d %H:%M:%S"),
+            "type": "FULL_HISTORY",
+            "total_records": len(data),
+            "records": data
         }
     else:
-        # data es el objeto metrics del momento
-        export_file = export_dir / f"reporte_instante_{fecha_hoy}_{fecha_hora}.json"
-        contenido = {
-            "reporte_generado": now.strftime("%Y-%m-%d %H:%M:%S"),
-            "tipo": "INSTANTE_EXACTO",
-            "aforo_total_acumulado": data.get("total_count", 0),
-            "tasa_flujo_actual_por_min": data.get("flujo_por_minuto", 0),
-            "vehiculos_en_escena": data.get("total_vehicles", 0),
-            "estado_general_via": data.get("fluidez_avance", "N/A"),
-            "riesgo_de_embotellamiento": data.get("alerta_embotellamiento", False)
+        # data is the current metrics object
+        export_file = export_dir / f"report_snapshot_{today_str}_{timestamp_str}.json"
+        content = {
+            "report_generated": now.strftime("%Y-%m-%d %H:%M:%S"),
+            "type": "EXACT_SNAPSHOT",
+            "total_accumulated_count": data.get("total_count", 0),
+            "current_flow_per_minute": data.get("flow_per_minute", 0),
+            "vehicles_in_scene": data.get("total_vehicles", 0),
+            "overall_road_state": data.get("flow_state", "N/A"),
+            "congestion_risk": data.get("congestion_alert", False)
         }
-    
+
     try:
         with open(export_file, "w", encoding="utf-8") as f:
-            json.dump(contenido, f, indent=4, ensure_ascii=False)
+            json.dump(content, f, indent=4, ensure_ascii=False)
         return export_file.name
     except Exception as e:
-        print(f"⚠️ Error al exportar resumen JSON: {e}")
+        print(f"⚠️ Error exporting the JSON summary: {e}")
         return None
