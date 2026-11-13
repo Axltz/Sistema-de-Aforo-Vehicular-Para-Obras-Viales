@@ -63,6 +63,35 @@ def _json_default(value):
     return str(value)
 
 
+def _compose_frame(main, dashboard):
+    """Place the annotated video and the analytics dashboard side by side."""
+    main_h, main_w = main.shape[:2]
+
+    if dashboard is None:
+        dashboard = np.full((700, 400, 3), 30, dtype=np.uint8)
+        cv2.putText(
+            dashboard, "WAITING FOR", (45, 330),
+            cv2.FONT_HERSHEY_SIMPLEX, 0.8, (150, 150, 150), 2,
+        )
+        cv2.putText(
+            dashboard, "CALIBRATION", (45, 370),
+            cv2.FONT_HERSHEY_SIMPLEX, 0.8, (150, 150, 150), 2,
+        )
+
+    panel_h, panel_w = dashboard.shape[:2]
+    gap = 8
+    canvas_h = max(main_h, panel_h)
+
+    canvas = np.full((canvas_h, main_w + gap + panel_w, 3), 18, dtype=np.uint8)
+    y_main = (canvas_h - main_h) // 2
+    canvas[y_main:y_main + main_h, 0:main_w] = main
+    canvas[0:panel_h, main_w + gap:main_w + gap + panel_w] = dashboard
+    cv2.line(canvas, (main_w + gap // 2, 0),
+             (main_w + gap // 2, canvas_h), (70, 70, 70), 1)
+
+    return canvas
+
+
 def _open_writer(path, frame_size, fps):
     fourcc = cv2.VideoWriter_fourcc(*"mp4v")
     writer = cv2.VideoWriter(str(path), fourcc, fps, frame_size)
@@ -74,7 +103,8 @@ def _open_writer(path, frame_size, fps):
     return writer
 
 
-def generate_demo(video_path, output_path, max_frames=None, scale=1.0):
+def generate_demo(video_path, output_path, max_frames=None, scale=1.0,
+                  show_dashboard=True):
     video_path = Path(video_path)
     output_path = Path(output_path)
     output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -152,6 +182,9 @@ def generate_demo(video_path, output_path, max_frames=None, scale=1.0):
             # video keeps a constant resolution during the whole clip.
             output_frame = frame.copy()
             output_frame[roi["y1"]:roi["y2"], roi["x1"]:roi["x2"]] = annotated
+
+        if show_dashboard:
+            output_frame = _compose_frame(output_frame, last_dashboard)
 
         if scale != 1.0:
             new_size = (
@@ -259,6 +292,11 @@ def parse_args(argv=None):
         default=1.0,
         help="Output scale factor, e.g. 0.75 for a smaller file (default: 1.0)",
     )
+    parser.add_argument(
+        "--no-dashboard",
+        action="store_true",
+        help="Only render the annotated video, without the analytics panel",
+    )
     return parser.parse_args(argv)
 
 
@@ -278,7 +316,13 @@ def main(argv=None):
 
     max_frames = None if args.max_frames in (0, None) else args.max_frames
 
-    generate_demo(video, output, max_frames=max_frames, scale=args.scale)
+    generate_demo(
+        video,
+        output,
+        max_frames=max_frames,
+        scale=args.scale,
+        show_dashboard=not args.no_dashboard,
+    )
 
 
 if __name__ == "__main__":

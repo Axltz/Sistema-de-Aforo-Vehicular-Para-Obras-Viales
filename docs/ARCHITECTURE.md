@@ -180,3 +180,5 @@ risking the behavior of the GUI and CLI in the same step; extracting a shared
 - No performance or accuracy benchmarks are included.
 - The Docker image targets the CLI; the GUI needs Tkinter and a display.
 - Huffman decompression assumes the payload is a single JSON object.
+- `flow_per_minute` uses wall-clock crossing timestamps, so on a replayed video
+  it measures processing time rather than the clip's original time base.

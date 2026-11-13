@@ -1,0 +1,62 @@
+{
+  "generated_at": "2026-11-12 19:28:13",
+  "source_video": "C:\\Universidad\\5to Semestre\\sistema-aforo-vehicular-obras-viales\\data\\videos\\trafico1.mp4",
+  "output_video": "C:\\Universidad\\5to Semestre\\sistema-aforo-vehicular-obras-viales\\demo\\demo_trafico1.mp4",
+  "frames_processed": 332,
+  "video_fps": 23.98,
+  "video_seconds": 13.8,
+  "calibration_locked": true,
+  "calibration": {
+    "orientation": "vertical",
+    "flow_direction": 1,
+    "roi": {
+      "x1": 0,
+      "y1": 70,
+      "x2": 1024,
+      "y2": 576
+    },
+    "line": {
+      "start": [
+        0,
+        425
+      ],
+      "end": [
+        1024,
+        425
+      ]
+    }
+  },
+  "total_count": 27,
+  "final_metrics": {
+    "total_vehicles": 11,
+    "active_cluster_count": 1,
+    "spatial_interaction_pct": 69.0909090909091,
+    "flow_level": "MODERATE FLOW",
+    "flow_state": "DENSE / FLUID TRAFFIC",
+    "flow_per_minute": 18.8,
+    "total_count": 27,
+    "trend": "STABLE",
+    "prev_ids_pos": {},
+    "cluster_metrics": [
+      {
+        "name": "Moving Platoon",
+        "count": 8,
+        "density_pct": 72.72727272727273,
+        "risk": "LOW",
+        "speed": 18.8,
+        "ids": [
+          529,
+          592,
+          650,
+          676,
+          728,
+          730,
+          829,
+          847
+        ]
+      }
+    ],
+    "congestion_alert": false
+  },
+  "dashboard_image": "C:\\Universidad\\5to Semestre\\sistema-aforo-vehicular-obras-viales\\demo\\dashboard.png"
+}

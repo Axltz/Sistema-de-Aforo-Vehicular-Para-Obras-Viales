@@ -56,9 +56,19 @@ Press `Q` in the video window to stop the CLI.
 
 ## Demo
 
+[![Dashboard preview](demo/dashboard.png)](demo/demo_trafico1.mp4)
+
+▶ **[Watch the annotated demo video](demo/demo_trafico1.mp4)** ·
+**[Raw metrics](demo/demo_summary.json)**
+
+Generated with `trafico1.mp4`: 332 frames processed, 27 line crossings, final
+state `DENSE / FLUID TRAFFIC` at `18.8 veh/min`. Those numbers come from the
+committed `demo/demo_summary.json`, not from an estimate.
+
 `scripts/demo.py` runs the real pipeline headlessly and writes an annotated MP4
-plus a JSON summary. It does not open windows, so it also works over SSH, in a
-container or on a machine without a display — useful for sharing results.
+(the video with overlays plus the analytics dashboard side by side) and a JSON
+summary. It does not open windows, so it also works over SSH, in a container or
+on a machine without a display — useful for sharing results.
 
 ```bash
 python -m scripts.demo
@@ -71,7 +81,7 @@ writes:
 
 | File | Content |
 |---|---|
-| `demo/demo_trafico1.mp4` | Annotated video: detections, IDs, cluster labels, counting line |
+| `demo/demo_trafico1.mp4` | Video + dashboard: detections, IDs, cluster labels, counting line, live metrics |
 | `demo/demo_summary.json` | Calibration result, crossings and final metrics |
 | `demo/dashboard.png` | Last dashboard frame |
 
@@ -83,9 +93,13 @@ python -m scripts.demo --video data/videos/trafico2.mp4 --max-frames 300 --scale
 
 # Process the whole video
 python -m scripts.demo --max-frames 0
+
+# Video only, without the analytics panel
+python -m scripts.demo --no-dashboard
 ```
 
-Generated demo files are excluded from version control (see `.gitignore`).
+The `demo/` files are committed as an example output; running the command again
+overwrites them.
 
 ---
 
@@ -482,6 +496,9 @@ version control (see `.gitignore`).
   display.
 - Model weights and generated data are not versioned; keep them locally or
   mount them when running the container.
+- `flow_per_minute` is derived from wall-clock crossing timestamps. With a
+  webcam it reflects real time; when replaying a video file it reflects the
+  processing speed, not the original clip's time base.
 
 ---
 
