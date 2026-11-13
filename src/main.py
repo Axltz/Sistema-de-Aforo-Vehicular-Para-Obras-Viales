@@ -136,18 +136,15 @@ while cap.isOpened():
         save_metrics_local(result["metrics"], append_to_log=append_log)
 
     # STEP F: DRAW THE VISUAL LAYERS (OVERLAYS)
-    frame_with_overlay, dashboard = draw_overlay(cropped_frame, detected_vehicles, result)
+    frame_with_overlay = draw_overlay(cropped_frame, detected_vehicles, result)
 
-    # Initialize the window sizes
+    # Initialize the window size
     if frame_count == 1:
         cv2.namedWindow("Traffic System - Main View", cv2.WINDOW_NORMAL)
         cv2.resizeWindow("Traffic System - Main View", 800, int(800 * aspect))
-        cv2.namedWindow("Control Dashboard", cv2.WINDOW_NORMAL)
-        cv2.resizeWindow("Control Dashboard", 300, 500)
 
     # Render on screen
     cv2.imshow("Traffic System - Main View", frame_with_overlay)
-    cv2.imshow("Control Dashboard", dashboard)
     # Only save when YOLO ran: the frame changed visually
     if yolo_ran_this_frame:
         cv2.imwrite(str(LIVE_FRAME_PATH), frame_with_overlay)

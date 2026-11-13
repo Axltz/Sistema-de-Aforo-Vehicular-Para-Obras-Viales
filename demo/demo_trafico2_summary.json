@@ -1,0 +1,44 @@
+{
+  "generated_at": "2026-11-12 20:34:38",
+  "source_video": "C:\\Universidad\\5to Semestre\\sistema-aforo-vehicular-obras-viales\\data\\videos\\trafico2.mp4",
+  "output_video": "C:\\Universidad\\5to Semestre\\sistema-aforo-vehicular-obras-viales\\demo\\demo_trafico2.mp4",
+  "frames_processed": 300,
+  "video_fps": 30.0,
+  "video_seconds": 10.0,
+  "calibration_locked": true,
+  "calibration": {
+    "orientation": "vertical",
+    "flow_direction": 1,
+    "roi": {
+      "x1": 0,
+      "y1": 0,
+      "x2": 960,
+      "y2": 575
+    },
+    "line": {
+      "start": [
+        0,
+        480
+      ],
+      "end": [
+        960,
+        480
+      ]
+    }
+  },
+  "total_count": 7,
+  "final_metrics": {
+    "total_vehicles": 3,
+    "active_cluster_count": 0,
+    "spatial_interaction_pct": 15.0,
+    "flow_level": "LOW FLOW",
+    "flow_state": "MODERATE TRAFFIC",
+    "flow_per_minute": 4.8,
+    "total_count": 7,
+    "trend": "INCREASING",
+    "prev_ids_pos": {},
+    "cluster_metrics": [],
+    "congestion_alert": false
+  },
+  "frame_image": "C:\\Universidad\\5to Semestre\\sistema-aforo-vehicular-obras-viales\\demo\\demo_trafico2_frame.png"
+}

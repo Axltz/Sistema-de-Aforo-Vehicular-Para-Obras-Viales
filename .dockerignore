@@ -38,6 +38,7 @@ data/json
 data/logs
 data/live_frame.jpg
 data/metrics_live.json
+demo
 
 # Tests and dev tooling are not needed to run the application
 tests

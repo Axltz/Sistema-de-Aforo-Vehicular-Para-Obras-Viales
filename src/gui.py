@@ -57,10 +57,10 @@ class VehicleCounterEngine:
             self.cap.release()
 
     def tick(self):
-        """Processes a single frame and returns the images and metrics.
+        """Processes a single frame and returns the annotated frame and metrics.
            Original logic from main.py."""
         if not self.cap or not self.cap.isOpened():
-            return None, None, self.last_metrics
+            return None, self.last_metrics
 
         ret, frame = self.cap.read()
         if not ret:
@@ -68,7 +68,7 @@ class VehicleCounterEngine:
             self.cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
             ret, frame = self.cap.read()
             if not ret:
-                return None, None, self.last_metrics
+                return None, self.last_metrics
 
         h_orig, w_orig = frame.shape[:2]
         aspect = h_orig / w_orig
@@ -96,7 +96,7 @@ class VehicleCounterEngine:
             calibrate_system(detected_vehicles, frame.shape, self.state)
             cv2.putText(frame, f"CALIBRATING FLOW... {self.state['calibration_frames']}/30", (50, 50),
                         cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 2)
-            return frame, None, self.last_metrics
+            return frame, self.last_metrics
 
         # STEP B: Crop
         roi = self.state["active_roi"]
@@ -130,9 +130,9 @@ class VehicleCounterEngine:
             self.last_metrics = self.result["metrics"]
 
         # STEP F: Visual overlay (intact)
-        frame_with_overlay, dashboard_img = draw_overlay(cropped_frame, detected_vehicles, self.result)
+        frame_with_overlay = draw_overlay(cropped_frame, detected_vehicles, self.result)
 
-        return frame_with_overlay, dashboard_img, self.last_metrics
+        return frame_with_overlay, self.last_metrics
 
 
 class App(ctk.CTk):
@@ -450,7 +450,7 @@ class App(ctk.CTk):
 
     def update_loop(self):
         if self.running and self.engine:
-            frame_cv, dashboard_cv, metrics = self.engine.tick()
+            frame_cv, metrics = self.engine.tick()
 
             if frame_cv is not None:
                 # Display the frame in Tkinter

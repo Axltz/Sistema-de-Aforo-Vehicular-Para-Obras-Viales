@@ -17,8 +17,117 @@ an OpenCV CLI viewer.
 The system runs a continuous frame loop: it captures video (file or webcam),
 runs YOLO detection/tracking, counts vehicles crossing an automatically placed
 virtual line, and periodically computes traffic metrics (flow per minute,
-spatial interaction, congestion risk). Results are drawn over the video and on a
-dashboard, and can be exported as JSON or as Huffman-compressed binary reports.
+spatial interaction, congestion risk). Results are drawn over the video and in the
+desktop analytics panel, and can be exported as JSON or as Huffman-compressed binary reports.
+
+---
+
+## Quick Start (no Python knowledge required)
+
+The repository includes one-command launchers that create an isolated
+environment, install dependencies and start the application.
+
+**Windows — the easiest way: double-click one of these files**
+
+| File | What it does |
+|---|---|
+| **`Start System.bat`** | Opens the desktop application (CustomTkinter) |
+| **`Generate Demo.bat`** | Creates the annotated demo video, no windows |
+
+Both create the environment automatically on first use. You do not need to type
+anything.
+
+**Advanced: `run.bat` from a terminal**
+
+```bat
+run.bat            REM live CLI (opens two OpenCV windows)
+run.bat gui        REM CustomTkinter desktop app
+run.bat demo       REM writes an annotated demo video, no windows
+run.bat test       REM runs the unit tests
+```
+
+**Linux / macOS**:
+
+```bash
+./run.sh           # live CLI
+./run.sh gui       # desktop GUI
+./run.sh demo      # annotated demo video
+./run.sh test      # unit tests
+```
+
+The first run creates a `.venv/` folder and installs dependencies from
+`requirements-portable.txt` (unpinned, compatible with any Python 3.9+). Later
+runs start immediately. `requirements.txt` keeps the exact pins used by Docker
+and CI.
+
+Press `Q` in the video window to stop the CLI.
+
+---
+
+## Demo
+
+![Animated preview](demo/images/preview.gif)
+
+Three committed runs of the real pipeline. Each video is laid out like the
+desktop app: annotated video, live flow chart and metrics panel. The numbers come from
+the committed `*_summary.json` files, not from estimates.
+
+| Video | Source | Frames | Crossings | Final state |
+|---|---|---|---|---|
+| [`demo_trafico1.mp4`](demo/demo_trafico1.mp4) | `trafico1.mp4` | 332 | 27 | DENSE / FLUID TRAFFIC · 19.7 veh/min · 11 in scene |
+| [`demo_trafico2.mp4`](demo/demo_trafico2.mp4) | `trafico2.mp4` | 300 | 7 | MODERATE TRAFFIC · 4.8 veh/min · 3 in scene |
+| [`demo_trafico3.mp4`](demo/demo_trafico3.mp4) | `trafico3.mp4` | 120 | 3 | MODERATE TRAFFIC · 2.3 veh/min · 6 in scene |
+
+### Screenshots
+
+| Calibration | Detection and clusters |
+|---|---|
+| ![Calibration](demo/images/01_calibration.png) | ![Detection](demo/images/02_detections.png) |
+
+| Full frame | Metrics panel |
+|---|---|
+| ![Final frame](demo/images/03_final_frame.png) | ![Metrics panel](demo/images/04_metrics_panel.png) |
+
+### Generating the demos
+
+`scripts/demo.py` runs the real pipeline headlessly and writes an annotated MP4
+(annotated video, live flow chart and metrics panel) and a JSON
+summary. It does not open windows, so it also works over SSH, in a container or
+on a machine without a display.
+
+```bash
+python -m scripts.demo
+# or with the launcher:
+./run.sh demo
+# or on Windows: double-click "Generate Demo.bat"
+```
+
+By default it processes up to 450 frames of `data/videos/trafico1.mp4` and
+writes `<name>.mp4`, `<name>_summary.json` and `<name>_frame.png` into
+`demo/`.
+
+Flags:
+
+```bash
+# Another video, fewer frames, smaller output
+python -m scripts.demo --video data/videos/trafico2.mp4 --max-frames 300 --scale 0.7
+
+# Process the whole video
+python -m scripts.demo --max-frames 0
+
+# Video only, without the analytics panel
+python -m scripts.demo --video-only
+```
+
+The stills and the animated GIF are built from a demo video with:
+
+```bash
+python -m scripts.gallery
+# writes demo/images/*.png and demo/images/preview.gif
+```
+
+The `demo/` files are committed as example output; running the commands again
+overwrites them.
 
 ---
 
@@ -61,7 +170,7 @@ This project provides a self-contained, local way to:
   timestamps), spatial interaction percentage, flow level/state, trend,
   per-cluster risk and a congestion alert.
 - **Visualization**: a video overlay (counting line, per-vehicle HUD, cluster
-  labels) plus a dashboard, and a CustomTkinter GUI with a live Matplotlib chart.
+  labels) in the CLI, and a CustomTkinter GUI with a live Matplotlib chart.
 - **JSON export** for a snapshot or the accumulated history.
 - **Custom Huffman compression** of JSON reports into a `.bin` file plus a
   dictionary sidecar, with in-app decompression.
@@ -185,11 +294,20 @@ Huffman coding is implemented in-house with the standard library (`heapq`,
 │   ├── storage/
 │   │   └── json_writer.py      # live snapshot, JSONL and JSON export
 │   └── visualization/
-│       └── overlay.py          # video overlay + dashboard
+│       └── overlay.py          # video annotation (line, HUD, clusters)
+├── scripts/
+│   ├── demo.py                 # headless demo video generator
+│   ├── gallery.py              # stills + GIF from a demo video
+│   └── layout.py               # GUI-style frame renderer
 ├── tests/
 │   ├── test_huffman.py
 │   ├── test_metrics.py
 │   └── test_graphs.py
+├── demo/
+│   ├── demo_trafico1.mp4       # committed example runs (GUI layout)
+│   ├── demo_trafico2.mp4
+│   ├── demo_trafico3.mp4
+│   └── images/                 # stills + animated preview
 ├── data/
 │   ├── videos/                 # sample input videos
 │   ├── json/                   # exported reports (generated)
@@ -198,12 +316,17 @@ Huffman coding is implemented in-house with the standard library (`heapq`,
 │   └── yolo26n.pt              # YOLO weights (expected at this path)
 ├── docs/
 │   └── ARCHITECTURE.md
+├── Start System.bat            # double-click: desktop application
+├── Generate Demo.bat           # double-click: demo video generator
+├── run.bat                     # Windows one-click launcher
+├── run.sh                      # Linux / macOS launcher
 ├── Dockerfile
 ├── .dockerignore
 ├── .env.example
 ├── .flake8
 ├── pytest.ini
 ├── requirements.txt
+├── requirements-portable.txt
 ├── requirements-dev.txt
 └── .github/workflows/ci.yml
 ```
@@ -214,11 +337,15 @@ Huffman coding is implemented in-house with the standard library (`heapq`,
 
 ### Prerequisites
 
-- Python 3.11 (the version used by Docker and CI).
+- Python 3.9+ (3.11 is the version used by Docker and CI; newer versions work
+  through `requirements-portable.txt`).
 - A video file (sample clips are in `data/videos/`) or a webcam.
 - Optional: Docker, for the container workflow.
 
 ### Local Setup
+
+> If you just want to run the project, use the [Quick Start](#quick-start-no-python-knowledge-required)
+> launchers instead. The steps below describe the manual setup.
 
 ```bash
 # 1. Clone the repository
@@ -293,6 +420,15 @@ CLI keyboard controls:
 
 - `Q` – quit.
 - `E` – export a Huffman-compressed report for the current metrics.
+
+### Demo video (headless)
+
+```bash
+python -m scripts.demo
+```
+
+Runs the same pipeline without opening windows and writes the annotated video
+and a JSON summary to `demo/`. See [Demo](#demo) for details and flags.
 
 ---
 
@@ -397,6 +533,9 @@ version control (see `.gitignore`).
   display.
 - Model weights and generated data are not versioned; keep them locally or
   mount them when running the container.
+- `flow_per_minute` is derived from wall-clock crossing timestamps. With a
+  webcam it reflects real time; when replaying a video file it reflects the
+  processing speed, not the original clip's time base.
 
 ---
 
